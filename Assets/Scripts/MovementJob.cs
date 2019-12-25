@@ -4,10 +4,13 @@ using UnityEngine;
 using Unity.Jobs;
 using UnityEngine.Jobs;
 using System;
+using Unity.Burst;
 
 //https://www.youtube.com/watch?time_continue=108&v=WZ6-LxwxWEI&feature=emb_logo
 
-//[ComputeJobOptimisation]
+// depricated [ComputeJobOptimisation]
+// need to move to burst compiller https://docs.unity3d.com/Packages/com.unity.burst@0.2/manual/index.html?q=burst%20user%20guid
+[BurstCompile]
 public struct MovementJob : IJobParallelForTransform
 {
     public float moveSpeed;
