@@ -3,8 +3,10 @@ using Unity.Jobs;
 using UnityEngine.Jobs;
 using Unity.Collections;
 using Unity.Entities;
+using MyJobs;
 
 //https://www.youtube.com/watch?time_continue=108&v=WZ6-LxwxWEI&feature=emb_logo
+
 public class GameManagerJob : MonoBehaviour
 {
     [SerializeField] GameObject _enemyPrefab;
@@ -19,7 +21,7 @@ public class GameManagerJob : MonoBehaviour
     MovementJob _movementJob;
     JobHandle _jobHandle;
 
-    [SerializeField] int count ;
+    [SerializeField] int count;
     private void OnDisable()
     {
         _jobHandle.Complete();
@@ -55,7 +57,7 @@ public class GameManagerJob : MonoBehaviour
 
     private void AddShips(int amount)
     {
-        for(int i = 0; i < amount; i++)
+        for (int i = 0; i < amount; i++)
         {
             float xVal = Random.Range(0, 20);
             float yVal = Random.Range(0, 10);
@@ -63,10 +65,11 @@ public class GameManagerJob : MonoBehaviour
             Vector3 pos = new Vector3(xVal, yVal, 0);
             Quaternion rotation = Quaternion.Euler(0, 180, 0);
 
-            var obj = Instantiate(_enemyPrefab, pos, rotation)as GameObject;
+            var obj = Instantiate(_enemyPrefab, pos, rotation) as GameObject;
             obj.transform.parent = this.transform;
         }
 
         count += amount;
     }
 }
+
