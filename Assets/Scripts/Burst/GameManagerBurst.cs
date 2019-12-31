@@ -51,7 +51,7 @@ namespace Burst
                 deltatime = Time.deltaTime
             };
 
-            _jobHandle = _movementJob.Schedule(_transforms);
+         //   _jobHandle = _movementJob.Schedule(_transforms);
             JobHandle.ScheduleBatchedJobs();
         }
 
