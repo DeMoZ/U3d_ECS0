@@ -24,16 +24,8 @@ public class BulletSpawner : MonoBehaviour
 
     public void PlusEntities(float3 pos, quaternion rot)
     {
-
         Entity bullet = entityManager.Instantiate(BulletEntityPrefab);
         entityManager.SetComponentData(bullet, new Translation { Value = pos });
         entityManager.SetComponentData(bullet, new Rotation { Value = rot });
-
-
-
-        //    enemyArray = entityManager.GetAllEntities(Allocator.Temp);
-        //    _mainUI.SetTotalEnemyValue(enemyArray.Length);
-        //    enemyArray.Dispose();
-        //}
     }
 }

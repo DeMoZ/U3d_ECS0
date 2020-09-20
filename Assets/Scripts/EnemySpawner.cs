@@ -71,8 +71,6 @@ public class EnemySpawner : MonoBehaviour
             entityManager.SetComponentData(enemyArray[i], new Translation { Value = RandomPointOnCircle(_spawnRadius) });
             entityManager.SetComponentData(enemyArray[i], new Rotation { Value = RandomRotation() });
             entityManager.SetComponentData(enemyArray[i], new TurnTimer { TimeRange = new float2(1, 8) });
-            
-            entityManager.SetComponentData(enemyArray[i], new ShootTimer { TimeRange = new float2(0.5f, 2) });
         }
 
         enemyArray = entityManager.GetAllEntities(Allocator.Temp);
@@ -95,91 +93,4 @@ public class EnemySpawner : MonoBehaviour
         _mainUI.SetTotalEnemyValue(enemyArray.Length);
         enemyArray.Dispose();
     }
-    /*
-    private void Start2()
-    {
-        entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
-
-        for (int i = 0; i < enemyNumber; i++)
-        {
-            Vector3 pos = new Vector3(Random.Range(-10, 10),
-                                      Random.Range(-10, 10),
-                                      Random.Range(-10, 10));
-
-            float rotY = Random.Range(-180, 180);
-
-            GameObject go = Instantiate(_enemyPrefab, pos, Quaternion.EulerAngles(0, rotY, 0));
-        }
-
-    }
-    */
-    /*
-    [SerializeField] private Mesh _enemyMesh;
-    [SerializeField] private Material _enemyMaterial;
-    [SerializeField] private int enemyNumber = 100; 
-    private EntityManager entityManager;
-
-
-    private void Start1()
-    {
-        entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
-
-        // 1 задать архетип сущности - наделяем всеми интересующими свойствами
-        EntityArchetype archetype = entityManager.CreateArchetype(
-            typeof(Translation),
-            typeof(Rotation),
-            typeof(RenderMesh),
-            typeof(RenderBounds),
-            typeof(LocalToWorld));
-
-
-        for (int i = 0; i < enemyNumber; i++)
-        {
-            // 2 создать сущность выбранного архетипа
-            Entity entity = entityManager.CreateEntity(archetype);
-
-            // 3 задать параметры сущности - положение/поворот, внешний вид
-            entityManager.AddComponentData(entity, new Translation { Value = new float3(-5f, 0.5f, 5f) });
-
-            entityManager.AddComponentData(entity, new Rotation { Value = quaternion.EulerXYZ(new float3(0f, 45f, 0f)) });
-
-            entityManager.AddSharedComponentData(entity, new RenderMesh
-            {
-                mesh = _enemyMesh,
-                material = _enemyMaterial
-            });
-        }
-    }
-    */
-
-    /*
-private void Start0()
-{
-    entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
-
-    // 1 задать архетип сущности - наделяем всеми интересующими свойствами
-    EntityArchetype archetype = entityManager.CreateArchetype(
-        typeof(Translation),
-        typeof(Rotation),
-        typeof(RenderMesh),
-        typeof(RenderBounds),
-        typeof(LocalToWorld));
-
-    for (int i = 0; i < 1000; i++)
-    {
-        // 2 создать сущность выбранного архетипа
-        Entity entity = entityManager.CreateEntity(archetype);
-
-        // 3 задать параметры сущности - положение/поворот, внешний вид
-        entityManager.AddComponentData(entity, new Translation { Value = new float3(-3f, 0.5f, 5f) });
-
-        entityManager.AddComponentData(entity, new Rotation { Value = quaternion.EulerXYZ(new float3(0f, 45f, 0f)) });
-
-        entityManager.AddSharedComponentData(entity, new RenderMesh
-        {
-            mesh = _enemyMesh,
-            material = _enemyMaterial
-        });
-    }
-}*/
 }

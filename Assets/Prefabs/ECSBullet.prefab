@@ -106,8 +106,10 @@ GameObject:
   m_Component:
   - component: {fileID: 232939269800362363}
   - component: {fileID: 232939269800362360}
+  - component: {fileID: -4720247731915593762}
+  - component: {fileID: -1068787314271430527}
   m_Layer: 0
-  m_Name: Bullet
+  m_Name: ECSBullet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -141,3 +143,29 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 10
+--- !u!114 &-4720247731915593762
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 232939269800362361}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d7e157973d7c9440a7bdf5fa54fe339, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Time: 2
+--- !u!114 &-1068787314271430527
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 232939269800362361}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d19e90d3269c2054baf059a459f35771, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  DamagePoints: 0
