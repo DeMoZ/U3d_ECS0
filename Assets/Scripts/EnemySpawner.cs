@@ -3,25 +3,12 @@ using UnityEngine;
 using Unity.Entities;
 using Unity.Transforms;
 using Unity.Mathematics;
+using System.Collections.Generic;
 
 public class EnemySpawner : MonoBehaviour
 {
-    [SerializeField] private GameObject _enemyPrefab;
-    private Entity _enemyEntityPrefab;
-    private Entity GetEnemyEntityPrefb
-    {
-        get
-        {
-            if (_enemyEntityPrefab == null)
-            {
-                Debug.Log("Prefab not exist, Creating");
-                var settings = GameObjectConversionSettings.FromWorld(World.DefaultGameObjectInjectionWorld, null);
-                _enemyEntityPrefab = GameObjectConversionUtility.ConvertGameObjectHierarchy(_enemyPrefab, settings);
-            }
-
-            return _enemyEntityPrefab;
-        }
-    }
+    [SerializeField] private List<GameObject> _enemiesPrefabs;
+    private List<Entity> _enemyEntitiesPrefabs = new List<Entity>();
 
     [SerializeField] private int _spawnCount = 100;
     [SerializeField] private float _spawnRadius = 10f;
@@ -38,39 +25,35 @@ public class EnemySpawner : MonoBehaviour
         entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
 
         var settings = GameObjectConversionSettings.FromWorld(World.DefaultGameObjectInjectionWorld, null);
+
         // перевод префаба в сущность
-        _enemyEntityPrefab = GameObjectConversionUtility.ConvertGameObjectHierarchy(_enemyPrefab, settings);
-
-        //  PlusEntities();
-    }
-
-
-
-
-    private float3 RandomPointOnCircle(object spawnRadius)
-    {
-        return new float3(UnityEngine.Random.Range(-10, 10),
-                          1f,
-                          UnityEngine.Random.Range(-10, 10));
-    }
-
-    private Quaternion RandomRotation()
-    {
-        float3 euler = new float3(0, UnityEngine.Random.Range(-180, 180), 0);
-
-        return Quaternion.Euler(euler);
+        foreach (GameObject prefab in _enemiesPrefabs)
+        {
+            Entity newEntity = GameObjectConversionUtility.ConvertGameObjectHierarchy(prefab, settings);
+            _enemyEntitiesPrefabs.Add(newEntity);
+        }
     }
 
     public void PlusEntities()
     {
         NativeArray<Entity> enemyArray = new NativeArray<Entity>(_spawnCount, Allocator.Temp);
 
+        int subCount = 0;
+
         for (int i = 0; i < enemyArray.Length; i++)
         {
-            enemyArray[i] = entityManager.Instantiate(GetEnemyEntityPrefb);
-            entityManager.SetComponentData(enemyArray[i], new Translation { Value = RandomPointOnCircle(_spawnRadius) });
-            entityManager.SetComponentData(enemyArray[i], new Rotation { Value = RandomRotation() });
+            enemyArray[i] = entityManager.Instantiate(_enemyEntitiesPrefabs[subCount]);
+
+            subCount++;
+
+            if (subCount >= _enemyEntitiesPrefabs.Count)
+                subCount = 0;
+
+            entityManager.SetComponentData(enemyArray[i], new Translation { Value = SharedMethods.RandomPointOnCircle(_spawnRadius) });
+            entityManager.SetComponentData(enemyArray[i], new Rotation { Value = SharedMethods.RandomRotation() });
             entityManager.SetComponentData(enemyArray[i], new TurnTimer { TimeRange = new float2(1, 8) });
+            TurnTimer t = entityManager.GetComponentData<TurnTimer>(enemyArray[i]);
+            entityManager.SetComponentData(enemyArray[i], new ShootTimer { TimeRange = t.TimeRange, TimerCounter = SharedMethods.MakeRandom(t.TimeRange) });
         }
 
         enemyArray = entityManager.GetAllEntities(Allocator.Temp);

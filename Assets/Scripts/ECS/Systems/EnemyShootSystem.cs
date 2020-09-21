@@ -29,8 +29,4 @@ public class EnemyShootSystem : ComponentSystem
             }
         });
     }
-
-    //float3 euler = new float3(0, UnityEngine.Random.Range(-180, 180), 0);
-    //    return Quaternion.Euler(euler);
-
 }
