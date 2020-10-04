@@ -677,7 +677,7 @@ MonoBehaviour:
   - {fileID: 3841195515477840287, guid: 8af0ee0d23513884d9017fc1fa48ace9, type: 3}
   - {fileID: 4663049549209083368, guid: fe1775e50a6a9144da324b46f5380b1d, type: 3}
   - {fileID: 5872987031492214746, guid: bc33188ddfa1c13418d0e0f766986723, type: 3}
-  _spawnCount: 100
+  _spawnCount: 3
   _spawnRadius: 10
   _speed:
     x: 0

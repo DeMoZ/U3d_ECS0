@@ -12,7 +12,6 @@ public class SharedMethods : MonoBehaviour
         return UnityEngine.Random.Range(x, y);
     }
 
-
     public static Quaternion RandomRotation()
     {
         float3 euler = new float3(0, UnityEngine.Random.Range(-180, 180), 0);

@@ -1,17 +1,5 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &362942861918272576
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4663049549209083368}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0209f62178694234eadf03629acd4535, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &8500773148260977783
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -71,10 +59,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: EcsEnemyCapsuleBlue
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 7155853637421389060, guid: 8af0ee0d23513884d9017fc1fa48ace9, type: 3}
+      propertyPath: Value
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 1162316251241455754, guid: 8af0ee0d23513884d9017fc1fa48ace9, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 8af0ee0d23513884d9017fc1fa48ace9, type: 3}
---- !u!1 &4663049549209083368 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3841195515477840287, guid: 8af0ee0d23513884d9017fc1fa48ace9, type: 3}
-  m_PrefabInstance: {fileID: 8500773148260977783}
-  m_PrefabAsset: {fileID: 0}
