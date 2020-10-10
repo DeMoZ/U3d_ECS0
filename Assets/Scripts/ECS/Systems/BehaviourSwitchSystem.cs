@@ -67,8 +67,9 @@ public class BehaviourSwitchSystem : ComponentSystem
                     break;
 
                 case ProjectEnums.BehaviourState.Attack:
-                    if (!CanAttackTarget(chaseTarget.Value, myPos, attackDistance.Value))
-                        behaviourState.Value = ProjectEnums.BehaviourState.Chasing;
+                    if (World.DefaultGameObjectInjectionWorld.EntityManager.Exists(entity))
+                        if (!CanAttackTarget(chaseTarget.Value, myPos, attackDistance.Value))
+                            behaviourState.Value = ProjectEnums.BehaviourState.Chasing;
                     break;
             }
         });
@@ -165,12 +166,10 @@ public class BehaviourSwitchSystem : ComponentSystem
 
     private bool CanAttackTarget(Entity targetEntity, float3 myPos, float attackDistance)
     {
-        if (World.DefaultGameObjectInjectionWorld.EntityManager.Exists(targetEntity))
-        {
-            Translation targetTranslation = World.DefaultGameObjectInjectionWorld.EntityManager.GetComponentData<Translation>(targetEntity);
-            if (math.distance(myPos, targetTranslation.Value) <= attackDistance)
-                return true;
-        }
+        Translation targetTranslation = World.DefaultGameObjectInjectionWorld.EntityManager.GetComponentData<Translation>(targetEntity);
+        if (math.distance(myPos, targetTranslation.Value) <= attackDistance)
+            return true;
+
 
         return false;
     }
