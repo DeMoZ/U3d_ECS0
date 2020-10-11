@@ -259,7 +259,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 203, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &165585586
@@ -660,7 +660,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &895075362
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -677,10 +677,11 @@ MonoBehaviour:
   - {fileID: 3841195515477840287, guid: 8af0ee0d23513884d9017fc1fa48ace9, type: 3}
   - {fileID: 4663049549209083368, guid: fe1775e50a6a9144da324b46f5380b1d, type: 3}
   - {fileID: 5872987031492214746, guid: bc33188ddfa1c13418d0e0f766986723, type: 3}
-  _spawnCount: 3
-  _spawnRadius: 10
+  _manualSpawnAmount: 100
   _autoSpawnAmount: 2
   _spawnTime: 3
+  _autospawn: 0
+  _spawnRadius: 10
   _mainUI: {fileID: 930622884}
 --- !u!4 &895075363
 Transform:
@@ -1010,7 +1011,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 203, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1134985274
@@ -1328,7 +1329,7 @@ MonoBehaviour:
       - m_Target: {fileID: 895075362}
         m_TargetAssemblyTypeName: EnemySpawner, Assembly-CSharp
         m_MethodName: SpawnEntities
-        m_Mode: 3
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
