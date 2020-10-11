@@ -1,15 +1,23 @@
 using UnityEngine;
 using Unity.Mathematics;
-public class SharedMethods : MonoBehaviour
+
+public static class SharedMethods
 {
-    public static float MakeRandom(float2 patrolingTimeRange, string str = "")
+    public static float MakeRandom(float2 patrolingTimeRange, string str = "", bool log = false)
     {
         return MakeRandom(patrolingTimeRange.x, patrolingTimeRange.y, str);
     }
 
-    public static float MakeRandom(float x, float y, string str = "")
+    public static float MakeRandom(float x, float y, string str = "", bool log = false)
     {
-        return UnityEngine.Random.Range(x, y);
+        if (log)
+        {
+            float rnd = UnityEngine.Random.Range(x, y);
+            Debug.Log($"{log} {rnd}");
+            return rnd;
+        }
+        else
+            return UnityEngine.Random.Range(x, y);
     }
 
     public static Quaternion RandomRotation()

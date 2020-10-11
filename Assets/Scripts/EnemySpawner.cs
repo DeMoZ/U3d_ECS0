@@ -4,29 +4,37 @@ using Unity.Entities;
 using Unity.Transforms;
 using Unity.Mathematics;
 using System.Collections.Generic;
+using System;
 
 public class EnemySpawner : MonoBehaviour
 {
     [SerializeField] private List<GameObject> _enemiesPrefabs;
     private List<Entity> _enemyEntitiesPrefabs = new List<Entity>();
+    [Header("Manualspawn")]
+    [Tooltip("Manual spawning Amount ")]
+    [SerializeField] private int _manualSpawnAmount = 100;
 
-    [SerializeField] private int _spawnCount = 100;
+    [Header("Autospawn")]
+    [Tooltip("Amount of creature for autospawning")]
+    [SerializeField] private int _autoSpawnAmount = 5;
+    [SerializeField] private float _spawnTime = 0.1f;
+    private float _spawnTimer;
+
+    [Header("Somehing")]
+    [SerializeField] bool _autospawn = true;
     [SerializeField] private float _spawnRadius = 10f;
-
-    [Range(1, 10)]
-    [SerializeField] private float2 _speed;
-
     [SerializeField] private MainUI _mainUI;
 
     private EntityManager entityManager;
 
     private void Start()
     {
+        _spawnTimer = _spawnTime;
+
         entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
 
         var settings = GameObjectConversionSettings.FromWorld(World.DefaultGameObjectInjectionWorld, null);
 
-        // перевод префаба в сущность
         foreach (GameObject prefab in _enemiesPrefabs)
         {
             Entity newEntity = GameObjectConversionUtility.ConvertGameObjectHierarchy(prefab, settings);
@@ -34,38 +42,47 @@ public class EnemySpawner : MonoBehaviour
         }
     }
 
-    public void PlusEntities()
+    private void Update()
     {
-        NativeArray<Entity> enemyArray = new NativeArray<Entity>(_spawnCount, Allocator.Temp);
-
-        int subCount = 0;
-
-        for (int i = 0; i < enemyArray.Length; i++)
+        _spawnTimer -= Time.deltaTime;
+        if (_autospawn && _spawnTimer <= 0)
         {
-            enemyArray[i] = entityManager.Instantiate(_enemyEntitiesPrefabs[subCount]);
+            _spawnTimer = _spawnTime;
 
-            subCount++;
-
-            if (subCount >= _enemyEntitiesPrefabs.Count)
-                subCount = 0;
-
-            entityManager.SetComponentData(enemyArray[i], new Translation { Value = SharedMethods.RandomPointOnCircle(_spawnRadius) });
-            entityManager.SetComponentData(enemyArray[i], new Rotation { Value = SharedMethods.RandomRotation() });
-            entityManager.SetComponentData(enemyArray[i], new TurnTimer { TimeRange = new float2(1, 8) });
-            TurnTimer t = entityManager.GetComponentData<TurnTimer>(enemyArray[i]);
-            entityManager.SetComponentData(enemyArray[i], new ShootTimer { TimeRange = t.TimeRange, TimerCounter = SharedMethods.MakeRandom(t.TimeRange) });
+            SpawnEntities(_autoSpawnAmount);
         }
-
-        enemyArray = entityManager.GetAllEntities(Allocator.Temp);
-        _mainUI.SetTotalEnemyValue(enemyArray.Length);
-        enemyArray.Dispose();
     }
+    public void SpawnEntities()
+    {
+        SpawnEntities(_manualSpawnAmount);
+    }
+    private void SpawnEntities(int amount)
+    {
+        int tagCount = 0;
+
+        for (int i = 0; i < amount; i++)
+        {
+            SpawnEntity(tagCount);
+
+            tagCount++;
+            tagCount = tagCount >= _enemyEntitiesPrefabs.Count ? 0 : tagCount;
+        }
+    }
+
+    private void SpawnEntity(int teamTag)
+    {
+        Entity entity = entityManager.Instantiate(_enemyEntitiesPrefabs[teamTag]);
+
+        entityManager.SetComponentData(entity, new Translation { Value = SharedMethods.RandomPointOnCircle(_spawnRadius) });
+        entityManager.SetComponentData(entity, new Rotation { Value = SharedMethods.RandomRotation() });
+    }
+
 
     public void MinusEntities()
     {
         NativeArray<Entity> enemyArray = entityManager.GetAllEntities(Allocator.Temp);
         Debug.Log($"enemies amount {enemyArray.Length}");
-        int removeAmount = Mathf.Clamp(enemyArray.Length - _spawnCount, 0, enemyArray.Length);
+        int removeAmount = Mathf.Clamp(enemyArray.Length - _manualSpawnAmount, 0, enemyArray.Length);
 
         for (int i = removeAmount; i > -1; i--)
         {

@@ -3,5 +3,5 @@
 [GenerateAuthoringComponent]
 public struct ChaseTarget : IComponentData
 {
-    public Entity Value;
+    public Entity Turget;
 }

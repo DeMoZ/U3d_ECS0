@@ -14,7 +14,7 @@ public class BehaviourSwitchSystem : ComponentSystem
             ref BehaviourState behaviourState,
             ref ChaseTarget chaseTarget) =>
         {
-            if (!World.DefaultGameObjectInjectionWorld.EntityManager.Exists(chaseTarget.Value))
+            if (!World.DefaultGameObjectInjectionWorld.EntityManager.Exists(chaseTarget.Turget))
             {
                 behaviourState.Value = ProjectEnums.BehaviourState.Patrolling;
                 PostUpdateCommands.RemoveComponent(entity, typeof(ChaseTarget));
@@ -26,7 +26,8 @@ public class BehaviourSwitchSystem : ComponentSystem
             Entity entity,
             ref BehaviourState behaviourState,
             ref TeamTag teamTag,
-            ref Translation tran
+            ref Translation tran,
+            ref NoticeTagetDistance noticeTagetDistance
             ) =>
         {
             behaviourState.Value = ProjectEnums.BehaviourState.Patrolling;
@@ -34,17 +35,18 @@ public class BehaviourSwitchSystem : ComponentSystem
             // find and select target
             float3 myPos = tran.Value;
             ProjectEnums.TeamTag myTeam = teamTag.Value;
+            float myNoticeTargetDistance = noticeTagetDistance.Value;
             Entity closestTarget = Entity.Null;
             float3 closestTargetPos = float3.zero;
 
-            FindTarget(ref closestTarget, ref closestTargetPos, myTeam, myPos);
+            FindTarget(ref closestTarget, ref closestTargetPos, myTeam, myPos, myNoticeTargetDistance);
 
             // if target found then chasing
             if (closestTarget != Entity.Null)
             {
                 behaviourState.Value = ProjectEnums.BehaviourState.Chasing;
 
-                PostUpdateCommands.AddComponent(entity, new ChaseTarget { Value = closestTarget });
+                PostUpdateCommands.AddComponent(entity, new ChaseTarget { Turget = closestTarget });
             }
         });
 
@@ -62,13 +64,13 @@ public class BehaviourSwitchSystem : ComponentSystem
             switch (behaviourState.Value)
             {
                 case ProjectEnums.BehaviourState.Chasing:
-                    if (CanAttackTarget(chaseTarget.Value, myPos, attackDistance.Value))
+                    if (CanAttackTarget(chaseTarget.Turget, myPos, attackDistance.Value))
                         behaviourState.Value = ProjectEnums.BehaviourState.Attack;
                     break;
 
                 case ProjectEnums.BehaviourState.Attack:
                     if (World.DefaultGameObjectInjectionWorld.EntityManager.Exists(entity))
-                        if (!CanAttackTarget(chaseTarget.Value, myPos, attackDistance.Value))
+                        if (!CanAttackTarget(chaseTarget.Turget, myPos, attackDistance.Value))
                             behaviourState.Value = ProjectEnums.BehaviourState.Chasing;
                     break;
             }
@@ -131,7 +133,7 @@ public class BehaviourSwitchSystem : ComponentSystem
         //});
     }
 
-    private void FindTarget(ref Entity target, ref float3 position, ProjectEnums.TeamTag myTeam, float3 myPos)
+    private void FindTarget(ref Entity target, ref float3 position, ProjectEnums.TeamTag myTeam, float3 myPos, float myNoticeTargetDistance)
     {
         Entity closestTarget = Entity.Null;
         float3 closestTargetPos = float3.zero;
@@ -144,19 +146,22 @@ public class BehaviourSwitchSystem : ComponentSystem
         {
             if (myTeam != targetTeamTag.Value)
             {
-                if (closestTarget == Entity.Null)
+                if (closestTarget == Entity.Null
+                && math.distance(myPos, targetTran.Value) < myNoticeTargetDistance
+                )
                 {
                     closestTarget = targetEntity;
                     closestTargetPos = targetTran.Value;
                 }
-                else
+
+                if (math.distance(myPos, targetTran.Value) < math.distance(myPos, closestTargetPos)
+                      && math.distance(myPos, targetTran.Value) < myNoticeTargetDistance
+                      )
                 {
-                    if (math.distance(myPos, targetTran.Value) < math.distance(myPos, closestTargetPos))
-                    {
-                        closestTarget = targetEntity;
-                        closestTargetPos = targetTran.Value;
-                    }
+                    closestTarget = targetEntity;
+                    closestTargetPos = targetTran.Value;
                 }
+
             }
         });
 
