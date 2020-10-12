@@ -1,4 +1,3 @@
-using UnityEngine;
 using Unity.Mathematics;
 
 public static class SharedMethods
@@ -13,18 +12,17 @@ public static class SharedMethods
         if (log)
         {
             float rnd = UnityEngine.Random.Range(x, y);
-            Debug.Log($"{log} {rnd}");
             return rnd;
         }
         else
             return UnityEngine.Random.Range(x, y);
     }
 
-    public static Quaternion RandomRotation()
+    public static quaternion RandomRotation()
     {
         float3 euler = new float3(0, UnityEngine.Random.Range(-180, 180), 0);
 
-        return Quaternion.Euler(euler);
+        return quaternion.Euler(euler);
     }
 
     public static float3 RandomPointOnCircle(object spawnRadius)
@@ -32,5 +30,15 @@ public static class SharedMethods
         return new float3(UnityEngine.Random.Range(-10, 10),
                           1f,
                           UnityEngine.Random.Range(-10, 10));
+    }
+
+    public static Random _Random = new Random();
+    public static float3 RandomPointOnCircle(float3 center, float radius)
+    {
+        float angle = _Random.NextFloat() * math.PI * 2;
+        float distance = math.sqrt(_Random.NextFloat()) * radius;
+        float x = center.x + distance * math.cos(angle);
+        float z = center.z + distance * math.sin(angle);
+        return new float3(x, center.y, z);
     }
 }
