@@ -75,6 +75,9 @@ public class EnemySpawner : MonoBehaviour
 
         entityManager.SetComponentData(entity, new Translation { Value = SharedMethods.RandomPointOnCircle(_spawnRadius) });
         entityManager.SetComponentData(entity, new Rotation { Value = SharedMethods.RandomRotation() });
+        ShootTimer st = entityManager.GetComponentData<ShootTimer>(entity);
+        st.TimerCounter = SharedMethods.MakeRandom(st.TimeRange);
+        entityManager.SetComponentData(entity, st);
     }
 
 
