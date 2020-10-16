@@ -15,5 +15,5 @@ public struct Turn : IComponentData
     /// <summary>
     /// Countdown from _PatrolingTimeRange random
     /// </summary>
-    public float TimerCounter;//{ get; set; }
+    public float TimerCounter { get; set; }
 }

@@ -359,7 +359,6 @@ MonoBehaviour:
   TimeRange:
     x: 0.5
     y: 4
-  TimerCounter: 0
 --- !u!114 &7674500616594131741
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -372,7 +371,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a4521c332e4460c4291c31120a710056, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  HealthPoint: 0
+  HealthPoint: 2
 --- !u!114 &5448720924122118153
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -452,7 +451,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b827b9558fbbc542ba5886c146be7e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Value: 5
+  Value: 10
 --- !u!1 &7672553662260428791
 GameObject:
   m_ObjectHideFlags: 0

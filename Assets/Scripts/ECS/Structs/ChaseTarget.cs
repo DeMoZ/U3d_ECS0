@@ -1,7 +1,9 @@
 ﻿using Unity.Entities;
+using Unity.Transforms;
 
 [GenerateAuthoringComponent]
 public struct ChaseTarget : IComponentData
 {
-    public Entity Turget;
+    public Entity Target;
+    public Translation TargetTran;
 }

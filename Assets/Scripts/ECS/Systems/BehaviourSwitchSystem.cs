@@ -1,4 +1,3 @@
-using System;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
@@ -14,10 +13,11 @@ public class BehaviourSwitchSystem : ComponentSystem
             ref BehaviourState behaviourState,
             ref ChaseTarget chaseTarget) =>
         {
-            if (!World.DefaultGameObjectInjectionWorld.EntityManager.Exists(chaseTarget.Turget))
+            if (!World.DefaultGameObjectInjectionWorld.EntityManager.Exists(chaseTarget.Target))
             {
                 behaviourState.Value = ProjectEnums.BehaviourState.Patrolling;
-                PostUpdateCommands.RemoveComponent(entity, typeof(ChaseTarget));
+                //PostUpdateCommands.RemoveComponent(entity, typeof(ChaseTarget));
+                EntityManager.RemoveComponent(entity,typeof(ChaseTarget));
             }
         });
 
@@ -46,7 +46,7 @@ public class BehaviourSwitchSystem : ComponentSystem
             {
                 behaviourState.Value = ProjectEnums.BehaviourState.Chasing;
 
-                PostUpdateCommands.AddComponent(entity, new ChaseTarget { Turget = closestTarget });
+                PostUpdateCommands.AddComponent(entity, new ChaseTarget { Target = closestTarget });
             }
         });
 
@@ -59,35 +59,74 @@ public class BehaviourSwitchSystem : ComponentSystem
             ref BehaviourState behaviourState,
             ref AttackDistance attackDistance) =>
         {
-            float3 myPos = tran.Value;
 
-            switch (behaviourState.Value)
+            // if (!World.DefaultGameObjectInjectionWorld.EntityManager.Exists(chaseTarget.Target))
+            if (chaseTarget.Target == Entity.Null)
             {
-                case ProjectEnums.BehaviourState.Chasing:
-                    if (CanAttackTarget(chaseTarget.Turget, myPos, attackDistance.Value))
-                        behaviourState.Value = ProjectEnums.BehaviourState.Attack;
-                    break;
+                behaviourState.Value = ProjectEnums.BehaviourState.Patrolling;
+                // PostUpdateCommands.RemoveComponent(entity, typeof(ChaseTarget));
+                EntityManager.RemoveComponent(entity, typeof(ChaseTarget));
 
-                case ProjectEnums.BehaviourState.Attack:
-                    if (World.DefaultGameObjectInjectionWorld.EntityManager.Exists(entity))
-                        if (!CanAttackTarget(chaseTarget.Turget, myPos, attackDistance.Value))
+            }
+            else
+            {
+                float3 myPos = tran.Value;
+
+                switch (behaviourState.Value)
+                {
+                    case ProjectEnums.BehaviourState.Chasing:
+                        if (CanAttackTarget(chaseTarget.Target, myPos, attackDistance.Value))
+                            behaviourState.Value = ProjectEnums.BehaviourState.Attack;
+                        break;
+
+                    case ProjectEnums.BehaviourState.Attack:
+                        if (!CanAttackTarget(chaseTarget.Target, myPos, attackDistance.Value))
                             behaviourState.Value = ProjectEnums.BehaviourState.Chasing;
-                    break;
+                        break;
+                }
             }
         });
 
-
-
-        //Entities.WithAll<BehaviourState>().ForEach((
+        //// for all with target
+        //Entities.WithAll<ChaseTarget, BehaviourState>().ForEach((
+        //    Entity entity,
         //    ref Translation tran,
         //    ref ChaseTarget chaseTarget,
         //    ref TeamTag teamTag,
         //    ref BehaviourState behaviourState,
-        //    ref AttackDistance attackDistance
+        //    ref AttackDistance attackDistance) =>
+        //{
+        //    float3 myPos = tran.Value;
+
+        //    switch (behaviourState.Value)
+        //    {
+        //        case ProjectEnums.BehaviourState.Chasing:
+        //            if (CanAttackTarget1(chaseTarget.Target, myPos, attackDistance.Value))
+        //                behaviourState.Value = ProjectEnums.BehaviourState.Attack;
+        //            break;
+
+        //        case ProjectEnums.BehaviourState.Attack:
+        //            if (World.DefaultGameObjectInjectionWorld.EntityManager.Exists(chaseTarget.Target))
+        //                if (!CanAttackTarget2(chaseTarget.Target, myPos, attackDistance.Value))
+        //                    behaviourState.Value = ProjectEnums.BehaviourState.Chasing;
+        //            break;
+        //    }
+        //});
+
+
+
+        //Entities.WithAll<ChaseTarget,BehaviourState>().ForEach((
+        //    ref Translation tran,
+        //    ref ChaseTarget chaseTarget,
+        //    ref TeamTag teamTag,
+        //    ref BehaviourState behaviourState,
+        //    ref AttackDistance attackDistance,
+        //    ref NoticeTagetDistance noticeTagetDistance
         //    ) =>
         //{
         //    float3 myPos = tran.Value;
         //    ProjectEnums.TeamTag myTeam = teamTag.Value;
+        //    float myNoticeTargetDistance = noticeTagetDistance.Value;
 
         //    switch (behaviourState.Value)
         //    {
@@ -96,37 +135,37 @@ public class BehaviourSwitchSystem : ComponentSystem
         //            Entity closestTarget = Entity.Null;
         //            float3 closestTargetPos = float3.zero;
 
-        //            if (chaseTarget.Value == Entity.Null)
-        //                FindTarget(ref closestTarget, ref closestTargetPos, myTeam, myPos);
+        //            if (chaseTarget.Target == Entity.Null)
+        //                FindTarget(ref closestTarget, ref closestTargetPos, myTeam, myPos, myNoticeTargetDistance);
 
         //            // if target found then chasing
         //            if (closestTarget != Entity.Null)
         //            {
         //                behaviourState.Value = ProjectEnums.BehaviourState.Chasing;
-        //                chaseTarget.Value = closestTarget;
+        //                chaseTarget.Target = closestTarget;
         //            }
         //            // if no target found then movement system will proceed with movement
         //            break;
 
         //        case ProjectEnums.BehaviourState.Chasing:
         //            // check if target exist, if no - browsing
-        //            if (!World.DefaultGameObjectInjectionWorld.EntityManager.Exists(chaseTarget.Value))
+        //            if (!World.DefaultGameObjectInjectionWorld.EntityManager.Exists(chaseTarget.Target))
         //            {
         //                behaviourState.Value = ProjectEnums.BehaviourState.Patrolling;
-        //                chaseTarget.Value = Entity.Null;
+        //                chaseTarget.Target = Entity.Null;
         //            }
-        //            else if (CanAttackTarget(chaseTarget.Value, myPos, attackDistance.Value))
+        //            else if (CanAttackTarget(chaseTarget.Target, myPos, attackDistance.Value))
         //                // check if can attack - then attack
         //                behaviourState.Value = ProjectEnums.BehaviourState.Attack;
         //            break;
 
         //        case ProjectEnums.BehaviourState.Attack:
-        //            if (!World.DefaultGameObjectInjectionWorld.EntityManager.Exists(chaseTarget.Value))
+        //            if (!World.DefaultGameObjectInjectionWorld.EntityManager.Exists(chaseTarget.Target))
         //            {
         //                behaviourState.Value = ProjectEnums.BehaviourState.Patrolling;
-        //                chaseTarget.Value = Entity.Null;
+        //                chaseTarget.Target = Entity.Null;
         //            }
-        //            else if (!CanAttackTarget(chaseTarget.Value, myPos, attackDistance.Value))
+        //            else if (!CanAttackTarget(chaseTarget.Target, myPos, attackDistance.Value))
         //                behaviourState.Value = ProjectEnums.BehaviourState.Chasing;
         //            break;
         //    }
@@ -175,8 +214,7 @@ public class BehaviourSwitchSystem : ComponentSystem
         if (math.distance(myPos, targetTranslation.Value) <= attackDistance)
             return true;
 
-
         return false;
-    }
+    }  
 
 }

@@ -21,6 +21,17 @@ public class DestructionSystem : ComponentSystem
             {
                 if (math.distance(vilianPos, victimTrans.Value) < 1)
                 {
+                    Entities.WithAll<ChaseTarget>().ForEach((
+                       Entity entity,
+                        ref ChaseTarget chaseTarget
+                        ) =>
+                    {
+                        if (entity == chaseTarget.Target)
+                            // PostUpdateCommands.RemoveComponent(entity, typeof(ChaseTarget));
+                            EntityManager.RemoveComponent(entity, typeof(ChaseTarget));
+
+                    });
+
                     entityManager.DestroyEntity(vilian);
                     entityManager.DestroyEntity(victim);
                 }

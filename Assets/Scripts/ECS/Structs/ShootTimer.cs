@@ -5,5 +5,5 @@ using Unity.Mathematics;
 public struct ShootTimer : IComponentData
 {
     public float2 TimeRange;
-    public float TimerCounter;//{ get; set; }
+    public float TimerCounter { get; set; }
 }
