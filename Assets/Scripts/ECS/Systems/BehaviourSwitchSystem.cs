@@ -1,136 +1,82 @@
-using System;
-using Unity.Entities;
-using Unity.Mathematics;
+﻿using Unity.Mathematics;
 using Unity.Transforms;
+using Unity.Entities;
 
-// Only state machine changing
 public class BehaviourSwitchSystem : ComponentSystem
 {
+    private float _noticeTargetDistance = 10f;
     protected override void OnUpdate()
     {
-        // for all with no valid target
-        Entities.WithAll<ChaseTarget, BehaviourState>().ForEach((
+        Entities.WithAll<BehaviourStatePatrolling>().ForEach((
             Entity entity,
-            ref BehaviourState behaviourState,
-            ref ChaseTarget chaseTarget) =>
+            ref Translation translation,
+            ref TeamTag teamTag) =>
         {
-            if (!World.DefaultGameObjectInjectionWorld.EntityManager.Exists(chaseTarget.Turget))
-            {
-                behaviourState.Value = ProjectEnums.BehaviourState.Patrolling;
-                PostUpdateCommands.RemoveComponent(entity, typeof(ChaseTarget));
-            }
-        });
-
-        // for all who has no target
-        Entities.WithNone<ChaseTarget>().WithAll<BehaviourState>().ForEach((
-            Entity entity,
-            ref BehaviourState behaviourState,
-            ref TeamTag teamTag,
-            ref Translation tran,
-            ref NoticeTagetDistance noticeTagetDistance
-            ) =>
-        {
-            behaviourState.Value = ProjectEnums.BehaviourState.Patrolling;
-
-            // find and select target
-            float3 myPos = tran.Value;
+            float3 myPos = translation.Value;
             ProjectEnums.TeamTag myTeam = teamTag.Value;
-            float myNoticeTargetDistance = noticeTagetDistance.Value;
             Entity closestTarget = Entity.Null;
             float3 closestTargetPos = float3.zero;
 
-            FindTarget(ref closestTarget, ref closestTargetPos, myTeam, myPos, myNoticeTargetDistance);
+            FindTarget(ref closestTarget, ref closestTargetPos, myTeam, myPos, _noticeTargetDistance);
 
             // if target found then chasing
             if (closestTarget != Entity.Null)
             {
-                behaviourState.Value = ProjectEnums.BehaviourState.Chasing;
-
-                PostUpdateCommands.AddComponent(entity, new ChaseTarget { Turget = closestTarget });
+                EntityManager.RemoveComponent(entity, typeof(BehaviourStatePatrolling));
+                EntityManager.AddComponentData(entity, new BehaviourStateChasing { ChaseTarget = closestTarget });
             }
         });
 
-        // for all with target
-        Entities.WithAll<ChaseTarget, BehaviourState>().ForEach((
+        Entities.WithAll<BehaviourStateChasing>().ForEach((
             Entity entity,
-            ref Translation tran,
-            ref ChaseTarget chaseTarget,
-            ref TeamTag teamTag,
-            ref BehaviourState behaviourState,
+            ref Translation translation,
+            ref BehaviourStateChasing behaviourStateChasing,
             ref AttackDistance attackDistance) =>
         {
-            float3 myPos = tran.Value;
+            Entity targetEntity = behaviourStateChasing.ChaseTarget;
+            float3 myPos = translation.Value;
+            float myAttackDistance = attackDistance.Value;
 
-            switch (behaviourState.Value)
+            if (targetEntity == Entity.Null)
             {
-                case ProjectEnums.BehaviourState.Chasing:
-                    if (CanAttackTarget(chaseTarget.Turget, myPos, attackDistance.Value))
-                        behaviourState.Value = ProjectEnums.BehaviourState.Attack;
-                    break;
-
-                case ProjectEnums.BehaviourState.Attack:
-                    if (World.DefaultGameObjectInjectionWorld.EntityManager.Exists(entity))
-                        if (!CanAttackTarget(chaseTarget.Turget, myPos, attackDistance.Value))
-                            behaviourState.Value = ProjectEnums.BehaviourState.Chasing;
-                    break;
+                EntityManager.RemoveComponent(entity, typeof(BehaviourStateChasing));
+                EntityManager.AddComponent(entity, typeof(BehaviourStatePatrolling));
+            }
+            else
+            {
+                if (CanAttackTarget(targetEntity,myPos, myAttackDistance))
+                {
+                    EntityManager.RemoveComponent(entity, typeof(BehaviourStateChasing));
+                    EntityManager.AddComponentData(entity, new BehaviourStateAttacking { AttackTarget = targetEntity });
+                }
             }
         });
 
+        Entities.WithAll<BehaviourStateAttacking>().ForEach((
+            Entity entity,
+            ref Translation translation,
+            ref BehaviourStateAttacking behaviourStateAttacking,
+            ref AttackDistance attackDistance
+            ) =>
+        {
+            Entity targetEntity = behaviourStateAttacking.AttackTarget;
+            float3 myPos = translation.Value;
+            float myAttackDistance = attackDistance.Value;
 
-
-        //Entities.WithAll<BehaviourState>().ForEach((
-        //    ref Translation tran,
-        //    ref ChaseTarget chaseTarget,
-        //    ref TeamTag teamTag,
-        //    ref BehaviourState behaviourState,
-        //    ref AttackDistance attackDistance
-        //    ) =>
-        //{
-        //    float3 myPos = tran.Value;
-        //    ProjectEnums.TeamTag myTeam = teamTag.Value;
-
-        //    switch (behaviourState.Value)
-        //    {
-        //        case ProjectEnums.BehaviourState.Patrolling:
-        //            // find target
-        //            Entity closestTarget = Entity.Null;
-        //            float3 closestTargetPos = float3.zero;
-
-        //            if (chaseTarget.Value == Entity.Null)
-        //                FindTarget(ref closestTarget, ref closestTargetPos, myTeam, myPos);
-
-        //            // if target found then chasing
-        //            if (closestTarget != Entity.Null)
-        //            {
-        //                behaviourState.Value = ProjectEnums.BehaviourState.Chasing;
-        //                chaseTarget.Value = closestTarget;
-        //            }
-        //            // if no target found then movement system will proceed with movement
-        //            break;
-
-        //        case ProjectEnums.BehaviourState.Chasing:
-        //            // check if target exist, if no - browsing
-        //            if (!World.DefaultGameObjectInjectionWorld.EntityManager.Exists(chaseTarget.Value))
-        //            {
-        //                behaviourState.Value = ProjectEnums.BehaviourState.Patrolling;
-        //                chaseTarget.Value = Entity.Null;
-        //            }
-        //            else if (CanAttackTarget(chaseTarget.Value, myPos, attackDistance.Value))
-        //                // check if can attack - then attack
-        //                behaviourState.Value = ProjectEnums.BehaviourState.Attack;
-        //            break;
-
-        //        case ProjectEnums.BehaviourState.Attack:
-        //            if (!World.DefaultGameObjectInjectionWorld.EntityManager.Exists(chaseTarget.Value))
-        //            {
-        //                behaviourState.Value = ProjectEnums.BehaviourState.Patrolling;
-        //                chaseTarget.Value = Entity.Null;
-        //            }
-        //            else if (!CanAttackTarget(chaseTarget.Value, myPos, attackDistance.Value))
-        //                behaviourState.Value = ProjectEnums.BehaviourState.Chasing;
-        //            break;
-        //    }
-        //});
+            if (targetEntity == Entity.Null)
+            {
+                EntityManager.RemoveComponent(entity, typeof(BehaviourStateChasing));
+                EntityManager.AddComponent(entity, typeof(BehaviourStatePatrolling));
+            }
+            else
+            {
+                if (!CanAttackTarget(targetEntity, myPos, myAttackDistance))
+                {
+                    EntityManager.RemoveComponent(entity, typeof(BehaviourStateAttacking ));
+                    EntityManager.AddComponentData(entity, new BehaviourStateChasing { ChaseTarget = targetEntity });
+                }
+            }
+        });
     }
 
     private void FindTarget(ref Entity target, ref float3 position, ProjectEnums.TeamTag myTeam, float3 myPos, float myNoticeTargetDistance)
@@ -178,5 +124,4 @@ public class BehaviourSwitchSystem : ComponentSystem
 
         return false;
     }
-
 }

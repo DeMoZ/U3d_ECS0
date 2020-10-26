@@ -240,7 +240,6 @@ GameObject:
   - component: {fileID: 6102958540806862335}
   - component: {fileID: 7674500616594131741}
   - component: {fileID: 5448720924122118153}
-  - component: {fileID: -7825467437069055705}
   - component: {fileID: -4865441312337239170}
   - component: {fileID: -7436782901352987059}
   - component: {fileID: 6933982790200587397}
@@ -355,11 +354,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 55a27949507803848a6c2fa1b233a925, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  RotationSpeed: 5
-  TimeRange:
-    x: 0.5
-    y: 4
-  TimerCounter: 0
+  TurningSpeed: 10
 --- !u!114 &7674500616594131741
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -388,19 +383,7 @@ MonoBehaviour:
   TimeRange:
     x: 0.5
     y: 2
---- !u!114 &-7825467437069055705
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7672553662030407653}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 47d8172ff1bd105428fbf119bb4f99b9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Value: 2
+  TimerCounter: 0
 --- !u!114 &-4865441312337239170
 MonoBehaviour:
   m_ObjectHideFlags: 0

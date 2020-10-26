@@ -33,6 +33,7 @@ public static class SharedMethods
     }
 
     public static Random _Random = new Random();
+
     public static float3 RandomPointOnCircle(float3 center, float radius)
     {
         float angle = _Random.NextFloat() * math.PI * 2;
@@ -40,5 +41,23 @@ public static class SharedMethods
         float x = center.x + distance * math.cos(angle);
         float z = center.z + distance * math.sin(angle);
         return new float3(x, center.y, z);
+    }
+
+    public static float3 RandomPointInCircleRadius(float radius)
+    {
+        float angle = _Random.NextFloat() * math.PI * 2;
+        float distance = math.sqrt(_Random.NextFloat()) * radius;
+        float x = distance * math.cos(angle);
+        float z = distance * math.sin(angle);
+        return new float3(x, 0, z);
+    }
+
+    public static quaternion RotateTowardsTarget(float3 myPos, quaternion myRot, float3 targetPoint, float turningSpeed, float deltaTime)
+    {
+        float3 direction = targetPoint - myPos;
+        direction.y = 0;
+        quaternion disairedRotation = quaternion.LookRotation(direction, math.up());
+        quaternion rot = math.nlerp(myRot, disairedRotation, deltaTime * turningSpeed);
+        return rot;
     }
 }
