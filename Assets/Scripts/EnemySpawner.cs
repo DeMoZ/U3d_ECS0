@@ -73,6 +73,7 @@ public class EnemySpawner : MonoBehaviour
     {
         Entity entity = entityManager.Instantiate(_enemyEntitiesPrefabs[teamTag]);
 
+        entityManager.AddComponent<OnTheScene>(entity);
         entityManager.AddComponent<BehaviourStatePatrolling>(entity);
         entityManager.SetComponentData(entity, new Translation { Value = SharedMethods.RandomPointOnCircle(_spawnRadius) });
         entityManager.SetComponentData(entity, new Rotation { Value = SharedMethods.RandomRotation() });
@@ -86,12 +87,12 @@ public class EnemySpawner : MonoBehaviour
     {
         NativeArray<Entity> enemyArray = entityManager.GetAllEntities(Allocator.Temp);
         Debug.Log($"enemies amount {enemyArray.Length}");
-        int removeAmount = Mathf.Clamp(enemyArray.Length - _manualSpawnAmount, 0, enemyArray.Length);
+        // int removeAmount = Mathf.Clamp(enemyArray.Length - _manualSpawnAmount, 0, enemyArray.Length);
+        int removeAmount = enemyArray.Length - 1;
 
         for (int i = removeAmount; i > -1; i--)
-        {
-            entityManager.DestroyEntity(enemyArray[i]);
-        }
+            if (entityManager.HasComponent<OnTheScene>(enemyArray[i]))
+                entityManager.DestroyEntity(enemyArray[i]);
 
         enemyArray = entityManager.GetAllEntities(Allocator.Temp);
         _mainUI.SetTotalEnemyValue(enemyArray.Length);
