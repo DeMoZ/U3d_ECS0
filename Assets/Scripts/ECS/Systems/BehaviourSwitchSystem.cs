@@ -37,14 +37,15 @@ public class BehaviourSwitchSystem : ComponentSystem
             float3 myPos = translation.Value;
             float myAttackDistance = attackDistance.Value;
 
-            if (targetEntity == Entity.Null)
+            //if (targetEntity == Entity.Null)
+            if (!EntityManager.HasComponent(targetEntity, typeof(Translation)))
             {
                 EntityManager.RemoveComponent(entity, typeof(BehaviourStateChasing));
                 EntityManager.AddComponent(entity, typeof(BehaviourStatePatrolling));
             }
             else
             {
-                if (CanAttackTarget(targetEntity,myPos, myAttackDistance))
+                if (CanAttackTarget(targetEntity, myPos, myAttackDistance))
                 {
                     EntityManager.RemoveComponent(entity, typeof(BehaviourStateChasing));
                     EntityManager.AddComponentData(entity, new BehaviourStateAttacking { AttackTarget = targetEntity });
@@ -63,7 +64,8 @@ public class BehaviourSwitchSystem : ComponentSystem
             float3 myPos = translation.Value;
             float myAttackDistance = attackDistance.Value;
 
-            if (targetEntity == Entity.Null)
+            //if (targetEntity == Entity.Null)
+            if (!EntityManager.HasComponent(targetEntity, typeof(Translation)))
             {
                 EntityManager.RemoveComponent(entity, typeof(BehaviourStateChasing));
                 EntityManager.AddComponent(entity, typeof(BehaviourStatePatrolling));
@@ -72,7 +74,7 @@ public class BehaviourSwitchSystem : ComponentSystem
             {
                 if (!CanAttackTarget(targetEntity, myPos, myAttackDistance))
                 {
-                    EntityManager.RemoveComponent(entity, typeof(BehaviourStateAttacking ));
+                    EntityManager.RemoveComponent(entity, typeof(BehaviourStateAttacking));
                     EntityManager.AddComponentData(entity, new BehaviourStateChasing { ChaseTarget = targetEntity });
                 }
             }
@@ -117,10 +119,12 @@ public class BehaviourSwitchSystem : ComponentSystem
 
     private bool CanAttackTarget(Entity targetEntity, float3 myPos, float attackDistance)
     {
-        Translation targetTranslation = World.DefaultGameObjectInjectionWorld.EntityManager.GetComponentData<Translation>(targetEntity);
-        if (math.distance(myPos, targetTranslation.Value) <= attackDistance)
-            return true;
-
+        if (EntityManager.HasComponent(targetEntity, typeof(Translation)))
+        {
+            Translation targetTranslation = World.DefaultGameObjectInjectionWorld.EntityManager.GetComponentData<Translation>(targetEntity);
+            if (math.distance(myPos, targetTranslation.Value) <= attackDistance)
+                return true;
+        }
 
         return false;
     }

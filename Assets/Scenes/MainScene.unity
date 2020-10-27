@@ -662,7 +662,7 @@ MonoBehaviour:
   - {fileID: 3841195515477840287, guid: 8af0ee0d23513884d9017fc1fa48ace9, type: 3}
   - {fileID: 4663049549209083368, guid: fe1775e50a6a9144da324b46f5380b1d, type: 3}
   - {fileID: 5872987031492214746, guid: bc33188ddfa1c13418d0e0f766986723, type: 3}
-  _manualSpawnAmount: 1
+  _manualSpawnAmount: 2
   _autoSpawnAmount: 2
   _spawnTime: 3
   _autospawn: 0
@@ -1062,7 +1062,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _destructionSystem: 1
-  _enemyShootSystem: 1
   _inCameraViewPortSystem: 1
   _lifeTimerSystem: 1
   _moveForwardSystem: 1

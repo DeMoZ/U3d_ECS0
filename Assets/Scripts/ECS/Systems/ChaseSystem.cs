@@ -17,10 +17,14 @@ public class ChaseSystem : ComponentSystem
             float3 myPos = translation.Value;
             quaternion myRot = rotation.Value;
             float turningSpeed = turning.TurningSpeed;
-            float3 turgetPoint = World.DefaultGameObjectInjectionWorld.EntityManager.GetComponentData<Translation>(behaviourStateChasing.ChaseTarget).Value;
 
-            // rotation
-            rotation.Value = SharedMethods.RotateTowardsTarget(myPos, myRot, turgetPoint, turningSpeed, Time.DeltaTime);
+            if (EntityManager.HasComponent(behaviourStateChasing.ChaseTarget, typeof(Translation)))
+            {
+                float3 turgetPoint = World.DefaultGameObjectInjectionWorld.EntityManager.GetComponentData<Translation>(behaviourStateChasing.ChaseTarget).Value;
+
+                // rotation
+                rotation.Value = SharedMethods.RotateTowardsTarget(myPos, myRot, turgetPoint, turningSpeed, Time.DeltaTime);
+            }
         });
     }
 }
