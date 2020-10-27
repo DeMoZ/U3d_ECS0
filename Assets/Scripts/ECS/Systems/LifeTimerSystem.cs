@@ -1,22 +1,31 @@
 ﻿using Unity.Entities;
+using Unity.Jobs;
 
-public class LifeTimerSystem : ComponentSystem
+public class LifeTimerSystem : SystemBase
 {
-    private EntityManager entityManager;
+    EntityCommandBufferSystem m_Barrier;
 
-    protected override void OnStartRunning()
+    protected override void OnCreate()
     {
-        entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
+        m_Barrier = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
     }
 
+    // OnUpdate runs on the main thread.
     protected override void OnUpdate()
     {
-        Entities.WithAll<LifeTimer>().ForEach((Entity bullet, ref LifeTimer lifeTimer) =>
-        {
-            lifeTimer.Time -= Time.DeltaTime;
+        var commandBuffer = m_Barrier.CreateCommandBuffer().AsParallelWriter();
+        var deltaTime = Time.DeltaTime;
 
-            if (lifeTimer.Time <= 0)
-                entityManager.DestroyEntity(bullet);
-        });
+        Entities.ForEach((Entity entity, int nativeThreadIndex, ref LifeTimer lifetimer) =>
+        {
+            lifetimer.Time -= deltaTime;
+
+            if (lifetimer.Time < 0.0f)
+            {
+                commandBuffer.DestroyEntity(nativeThreadIndex, entity);
+            }
+        }).ScheduleParallel();
+
+        m_Barrier.AddJobHandleForProducer(Dependency);
     }
 }
