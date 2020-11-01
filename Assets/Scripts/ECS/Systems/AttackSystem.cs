@@ -51,7 +51,7 @@ public class AttackSystem : ComponentSystem
             }
             else
             {
-                EntityManager.RemoveComponent(entity, typeof(BehaviourStateChasing));
+                EntityManager.RemoveComponent(entity, typeof(BehaviourStateAttacking));
                 EntityManager.AddComponent(entity, typeof(BehaviourStatePatrolling));
             }
         });
