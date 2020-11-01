@@ -7,20 +7,28 @@ public class AttackSystem : ComponentSystem
     protected override void OnUpdate()
     {
         Entities.WithAll<BehaviourStateAttacking>().ForEach((
-            Entity entity,
-            ref Translation translation,
-            ref Rotation rotation,
-            ref BehaviourStateAttacking behaviourStateAttacking,
-            ref Turning turning,
-            ref ShootTimer shootTimer
+            Entity entity, ref Translation translation, ref Rotation rotation, ref BehaviourStateAttacking behaviourStateAttacking,
+            ref Turning turning, ref ShootTimer shootTimer, ref AttackDistance attackDistance
             ) =>
         {
             float3 myPos = translation.Value;
             quaternion myRot = rotation.Value;
             float turningSpeed = turning.TurningSpeed;
+            Entity targetEntity = behaviourStateAttacking.AttackTarget;
+            float myAttackDistance = attackDistance.Value;
+
 
             if (EntityManager.HasComponent(behaviourStateAttacking.AttackTarget, typeof(Translation)))
             {
+                // checks for attack
+                float3 targetPos = World.DefaultGameObjectInjectionWorld.EntityManager.GetComponentData<Translation>(behaviourStateAttacking.AttackTarget).Value;
+
+                if (!SharedMethods.CanAttackTarget(myPos, targetPos, myAttackDistance))
+                {
+                    EntityManager.RemoveComponent(entity, typeof(BehaviourStateAttacking));
+                    EntityManager.AddComponentData(entity, new BehaviourStateChasing { ChaseTarget = targetEntity });
+                }
+                
                 float3 turgetPoint = World.DefaultGameObjectInjectionWorld.EntityManager.GetComponentData<Translation>(behaviourStateAttacking.AttackTarget).Value;
 
                 // rotation
@@ -40,6 +48,11 @@ public class AttackSystem : ComponentSystem
                     EntityManager.SetComponentData(bulletEntity, new Translation { Value = bulletPos });
                     EntityManager.SetComponentData(bulletEntity, new Rotation { Value = rotation.Value });
                 }
+            }
+            else
+            {
+                EntityManager.RemoveComponent(entity, typeof(BehaviourStateChasing));
+                EntityManager.AddComponent(entity, typeof(BehaviourStatePatrolling));
             }
         });
     }
