@@ -57,7 +57,16 @@ public static class SharedMethods
         float3 direction = targetPoint - myPos;
         direction.y = 0;
         quaternion disairedRotation = quaternion.LookRotation(direction, math.up());
+        //quaternion rot = disairedRotation;
         quaternion rot = math.nlerp(myRot, disairedRotation, deltaTime * turningSpeed);
         return rot;
+    }
+
+    public static bool CanAttackTarget(float3 myPos, float3 targetPos, float attackDistance)
+    {
+        if (math.distance(myPos, targetPos) <= attackDistance)
+            return true;
+
+        return false;
     }
 }

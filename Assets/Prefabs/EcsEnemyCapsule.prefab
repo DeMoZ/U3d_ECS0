@@ -241,9 +241,10 @@ GameObject:
   - component: {fileID: 7674500616594131741}
   - component: {fileID: 5448720924122118153}
   - component: {fileID: -4865441312337239170}
-  - component: {fileID: -7436782901352987059}
   - component: {fileID: 6933982790200587397}
   - component: {fileID: -2824479511974704775}
+  - component: {fileID: -1045053818771772565}
+  - component: {fileID: 2812918000280063872}
   m_Layer: 0
   m_Name: EcsEnemyCapsule
   m_TagString: Untagged
@@ -397,19 +398,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Value: 0
---- !u!114 &-7436782901352987059
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7672553662030407653}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b0d65a4f3b4f5874b8908ac4b05fd429, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  speed: 3
 --- !u!114 &6933982790200587397
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -436,6 +424,37 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Value: 5
+--- !u!54 &-1045053818771772565
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7672553662030407653}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
+--- !u!114 &2812918000280063872
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7672553662030407653}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2e1dc726611f52a498e8d62be0acc4c3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PatrollSpeed: 2
+  ShaseSpeed: 3
+  AttackSpeed: 1
 --- !u!1 &7672553662260428791
 GameObject:
   m_ObjectHideFlags: 0

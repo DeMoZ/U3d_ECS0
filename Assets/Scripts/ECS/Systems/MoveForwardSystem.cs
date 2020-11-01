@@ -7,7 +7,7 @@ public class MoveForwardSystem : SystemBase
     {
         float deltaTime = Time.DeltaTime;
 
-        Entities.WithNone<BehaviourStatePatrolling, BehaviourStateChasing, BehaviourStateAttacking>().WithAll<MoveForward>().ForEach((
+        Entities.WithAll<MoveForward>().ForEach((
          ref Translation trans,
          in Rotation rot,
          in MoveForward moveForward
@@ -16,14 +16,14 @@ public class MoveForwardSystem : SystemBase
          trans.Value += moveForward.speed * deltaTime * math.forward(rot.Value);
      }).Run();
 
-        // Behaviour states movement
-        Entities.WithAny<BehaviourStatePatrolling, BehaviourStateChasing>().ForEach((
-             ref Translation trans,
-             in Rotation rot,
-             in MoveForward moveForward
-             ) =>
-         {
-             trans.Value += moveForward.speed * deltaTime * math.forward(rot.Value);
-         }).Run();
+        //// Behaviour states movement
+        //Entities.WithAny<BehaviourStatePatrolling, BehaviourStateChasing>().ForEach((
+        //     ref Translation trans,
+        //     in Rotation rot,
+        //     in MoveForward moveForward
+        //     ) =>
+        // {
+        //     trans.Value += moveForward.speed * deltaTime * math.forward(rot.Value);
+        // }).Run();
     }
 }
