@@ -2,9 +2,10 @@ using Unity.Mathematics;
 
 public static class SharedMethods
 {
-    public static float MakeRandom(float2 patrolingTimeRange, string str = "", bool log = false)
+
+    public static float MakeRandom(float2 range)
     {
-        return MakeRandom(patrolingTimeRange.x, patrolingTimeRange.y, str);
+        return UnityEngine.Random.Range(range.x, range.y);
     }
 
     public static float MakeRandom(float x, float y, string str = "", bool log = false)
