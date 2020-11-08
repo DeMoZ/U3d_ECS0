@@ -17,9 +17,9 @@ public class ChaseSystem : ComponentSystem
             quaternion myRot = rotation.Value;
             float turningSpeed = turning.TurningSpeed;
 
-            if (EntityManager.HasComponent(behaviourStateChasing.ChaseTarget, typeof(Translation)))
+            if (EntityManager.HasComponent(behaviourStateChasing.Target, typeof(Translation)))
             {
-                float3 turgetPoint = World.DefaultGameObjectInjectionWorld.EntityManager.GetComponentData<Translation>(behaviourStateChasing.ChaseTarget).Value;
+                float3 turgetPoint = World.DefaultGameObjectInjectionWorld.EntityManager.GetComponentData<Translation>(behaviourStateChasing.Target).Value;
 
                 // rotation
                 rotation.Value = SharedMethods.RotateTowardsTarget(myPos, myRot, turgetPoint, turningSpeed, Time.DeltaTime);
@@ -28,13 +28,13 @@ public class ChaseSystem : ComponentSystem
                 translation.Value += speed.PatrollSpeed * deltaTime * math.forward(rotation.Value);
 
                 // checks for attack
-                float3 targetPos = World.DefaultGameObjectInjectionWorld.EntityManager.GetComponentData<Translation>(behaviourStateChasing.ChaseTarget).Value;
+                float3 targetPos = World.DefaultGameObjectInjectionWorld.EntityManager.GetComponentData<Translation>(behaviourStateChasing.Target).Value;
                 float myAttackDistance = attackDistance.Value;
 
                 if (SharedMethods.CanAttackTarget(myPos, targetPos, myAttackDistance))
                 {
                     EntityManager.RemoveComponent(entity, typeof(BehaviourStateChasing));
-                    EntityManager.AddComponentData(entity, new BehaviourStateAttacking { AttackTarget = behaviourStateChasing.ChaseTarget });
+                    EntityManager.AddComponentData(entity, new BehaviourStateAttacking { Target = behaviourStateChasing.Target });
                 }
             }
             else

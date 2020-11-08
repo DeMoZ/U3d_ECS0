@@ -3,5 +3,5 @@
 [GenerateAuthoringComponent]
 public struct BehaviourStateAttacking : IComponentData
 {
-    public Entity AttackTarget;
+    public Entity Target;
 }
