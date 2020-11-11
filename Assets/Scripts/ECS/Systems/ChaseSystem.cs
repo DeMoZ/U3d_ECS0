@@ -4,27 +4,27 @@ using Unity.Entities;
 
 public class ChaseSystem : SystemBase
 {
-    EndSimulationEntityCommandBufferSystem barrier;
+    EndSimulationEntityCommandBufferSystem _barrier;
 
     protected override void OnCreate()
     {
-        barrier = World.GetExistingSystem<EndSimulationEntityCommandBufferSystem>();
+        _barrier = World.GetExistingSystem<EndSimulationEntityCommandBufferSystem>();
     }
 
     protected override void OnUpdate()
     {
         var deltaTime = Time.DeltaTime;
-        var commandBuffer = barrier.CreateCommandBuffer();
+        var commandBuffer = _barrier.CreateCommandBuffer().AsParallelWriter();
 
         Entities.WithAll<BehaviourStateChasing>().ForEach((
-            Entity entity, ref Translation translation, ref Rotation rotation, in BehaviourStateChasing behaviourStateChasing,
+            Entity entity,int nativeThreadIndex, ref Translation translation, ref Rotation rotation, in BehaviourStateChasing behaviourStateChasing,
             in Turning turning, in Speed speed, in AttackDistance attackDistance
             ) =>
         {
             if (!HasComponent<LocalToWorld>(behaviourStateChasing.Target))
             {
-                commandBuffer.RemoveComponent<BehaviourStateChasing>(entity);
-                commandBuffer.AddComponent<BehaviourStatePatrolling>(entity);
+                commandBuffer.RemoveComponent<BehaviourStateChasing>(nativeThreadIndex,entity);
+                commandBuffer.AddComponent<BehaviourStatePatrolling>(nativeThreadIndex,entity);
             }
             else
             {
@@ -35,6 +35,7 @@ public class ChaseSystem : SystemBase
                 var myAttackDistance = attackDistance.Value;
                 var turningSpeed = turning.TurningSpeed;
                 var myRot = rotation.Value;
+                
                 // rotation
                 rotation.Value = SharedMethods.RotateTowardsTarget(myPos, myRot, targetPos, turningSpeed, deltaTime);
 
@@ -44,10 +45,12 @@ public class ChaseSystem : SystemBase
                 // checks for attack
                 if (SharedMethods.CanAttackTarget(myPos, targetPos, myAttackDistance))
                 {
-                    commandBuffer.RemoveComponent<BehaviourStateChasing>(entity);
-                    commandBuffer.AddComponent(entity, new BehaviourStateAttacking { Target = behaviourStateChasing.Target });
+                    commandBuffer.RemoveComponent<BehaviourStateChasing>(nativeThreadIndex,entity);
+                    commandBuffer.AddComponent(nativeThreadIndex,entity, new BehaviourStateAttacking { Target = behaviourStateChasing.Target });
                 }
             }
-        }).Run();
+        }).ScheduleParallel();
+
+        _barrier.AddJobHandleForProducer(Dependency);
     }
 }
