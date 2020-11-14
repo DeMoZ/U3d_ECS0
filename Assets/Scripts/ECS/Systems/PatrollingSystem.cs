@@ -1,109 +1,95 @@
 ﻿using Unity.Mathematics;
 using Unity.Entities;
 using Unity.Transforms;
+using Unity.Collections;
 
-public class PatrollingSystem : ComponentSystem
+public class PatrollingSystem : SystemBase
 {
     private readonly float _patrolingRadius = 10f;
     private readonly float _targetReached = 0.2f; // target reached at this distance
     private Random _random = new Random(1);
     private float _noticeTargetDistance = 10f;
 
+    EndSimulationEntityCommandBufferSystem barrier;
+
+    private EntityQuery m_Group;
+
+    protected override void OnCreate()
+    {
+        barrier = World.GetExistingSystem<EndSimulationEntityCommandBufferSystem>();
+
+        m_Group = GetEntityQuery(typeof(TeamTag), typeof(Translation));//ComponentType.ReadOnly<TeamTag>(), ComponentType.ReadOnly<Translation>());
+    }
+
     protected override void OnUpdate()
     {
-        float deltaTime = Time.DeltaTime;
+        var deltaTime = Time.DeltaTime;
+        var commandBuffer = barrier.CreateCommandBuffer();
+        var patrollinRadius = _patrolingRadius;
+        var targetReached = _targetReached;
+        var noticeTargetDistance = _noticeTargetDistance;
+
+        var chunks = m_Group.CreateArchetypeChunkArray(Allocator.TempJob);
+        var teamTagType = GetComponentTypeHandle<TeamTag>();
+        var translationType = GetComponentTypeHandle<Translation>();
+        var entitiesType = GetEntityTypeHandle();
 
         Entities.WithAll<BehaviourStatePatrolling>().ForEach((
-           Entity entity, ref Translation translation, ref Rotation rotation, ref BehaviourStatePatrolling patrolling,
-            ref Turning turning, ref Speed speed, ref TeamTag teamTag
+            Entity entity, ref Translation translation, ref Rotation rotation, ref BehaviourStatePatrolling patrolling,
+            in Turning turning, in Speed speed, in TeamTag teamTag
             ) =>
         {
-            float3 myPos = translation.Value;
-            quaternion myRot = rotation.Value;
-            float turningSpeed = turning.TurningSpeed;
+            var myPos = translation.Value;
+            var myRot = rotation.Value;
+            var turningSpeed = turning.TurningSpeed;
 
             if (!patrolling.TargetPoint.HasValue)
-                patrolling.TargetPoint = GetPatrollingTargetPoint(myPos);
+                patrolling.TargetPoint = SharedMethods.GetRandomPatrollingPoint(myPos, patrollinRadius);
 
-            float3 targetPoint = (float3)patrolling.TargetPoint;
+            var targetPoint = (float3)patrolling.TargetPoint;
 
             // rotation
-            rotation.Value = SharedMethods.RotateTowardsTarget(myPos, myRot, targetPoint, turningSpeed, Time.DeltaTime);
+            rotation.Value = SharedMethods.RotateTowardsTarget(myPos, myRot, targetPoint, turningSpeed, deltaTime);
 
             // movement
             translation.Value += speed.PatrollSpeed * deltaTime * math.forward(rotation.Value);
 
-            if (math.distance(translation.Value, (float3)patrolling.TargetPoint) <= _targetReached)
-                patrolling.TargetPoint = GetPatrollingTargetPoint(myPos);
+            if (math.distance(translation.Value, (float3)patrolling.TargetPoint) <= targetReached)
+                patrolling.TargetPoint = SharedMethods.GetRandomPatrollingPoint(myPos, patrollinRadius);
 
+            var myTeam = teamTag.Value;
+            var closestTarget = Entity.Null;
+            var closestTargetPos = float3.zero;
 
-            ProjectEnums.TeamTag myTeam = teamTag.Value;
-            Entity closestTarget = Entity.Null;
-            float3 closestTargetPos = float3.zero;
-
-            FindTarget(ref closestTarget, ref closestTargetPos, myTeam, myPos, _noticeTargetDistance);
+            for (int c = 0; c < chunks.Length; c++)
+            {
+                var chunk = chunks[c];
+                var teamTagTypeArray = chunk.GetNativeArray(teamTagType);
+                var translationTypeArray = chunk.GetNativeArray(translationType);
+                var entitiesTypeArray = chunk.GetNativeArray(entitiesType);
+                for (int i = 0; i < chunk.Count; i++)
+                {
+                    if (teamTagTypeArray[i].Value != teamTag.Value)
+                    {
+                        if (closestTarget == Entity.Null
+                        && math.distance(myPos, translationTypeArray[i].Value) < noticeTargetDistance
+                        )
+                        {
+                            closestTarget = entitiesTypeArray[i];//need to get the Entity;
+                            closestTargetPos = translationTypeArray[i].Value;
+                        }
+                    }
+                }
+            }
 
             // if target found then chasing
             if (closestTarget != Entity.Null)
             {
-                EntityManager.RemoveComponent(entity, typeof(BehaviourStatePatrolling));
-                EntityManager.AddComponentData(entity, new BehaviourStateChasing { ChaseTarget = closestTarget });
+                commandBuffer.RemoveComponent<BehaviourStatePatrolling>(entity);
+                commandBuffer.AddComponent(entity, new BehaviourStateChasing { Target = closestTarget });
             }
-        });
-    }
+        }).Run();
 
-    private float3 GetPatrollingTargetPoint(float3 myPos)
-    {
-        float3 newPoint = float3.zero;
-        newPoint = myPos;
-
-        newPoint += RandomPointInCircleRadius(_patrolingRadius);
-
-        return newPoint;
-    }
-
-    private float3 RandomPointInCircleRadius(float radius)
-    {
-        float angle = _random.NextFloat() * math.PI * 2;
-        float distance = math.sqrt(_random.NextFloat()) * radius;
-        float x = distance * math.cos(angle);
-        float z = distance * math.sin(angle);
-        return new float3(x, 0, z);
-    }
-
-    private void FindTarget(ref Entity target, ref float3 position, ProjectEnums.TeamTag myTeam, float3 myPos, float myNoticeTargetDistance)
-    {
-        Entity closestTarget = Entity.Null;
-        float3 closestTargetPos = float3.zero;
-
-        Entities.WithAll<TeamTag>().ForEach((
-            Entity targetEntity,
-            ref Translation targetTran,
-            ref TeamTag targetTeamTag
-            ) =>
-        {
-            if (myTeam != targetTeamTag.Value)
-            {
-                if (closestTarget == Entity.Null
-                && math.distance(myPos, targetTran.Value) < myNoticeTargetDistance
-                )
-                {
-                    closestTarget = targetEntity;
-                    closestTargetPos = targetTran.Value;
-                }
-
-                if (math.distance(myPos, targetTran.Value) < math.distance(myPos, closestTargetPos)
-                      && math.distance(myPos, targetTran.Value) < myNoticeTargetDistance
-                      )
-                {
-                    closestTarget = targetEntity;
-                    closestTargetPos = targetTran.Value;
-                }
-
-            }
-        });
-
-        target = closestTarget;
-        position = closestTargetPos;
+        chunks.Dispose();
     }
 }

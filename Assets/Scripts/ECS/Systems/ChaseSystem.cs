@@ -2,46 +2,55 @@
 using Unity.Transforms;
 using Unity.Entities;
 
-public class ChaseSystem : ComponentSystem
+public class ChaseSystem : SystemBase
 {
+    EndSimulationEntityCommandBufferSystem _barrier;
+
+    protected override void OnCreate()
+    {
+        _barrier = World.GetExistingSystem<EndSimulationEntityCommandBufferSystem>();
+    }
+
     protected override void OnUpdate()
     {
-        float deltaTime = Time.DeltaTime;
+        var deltaTime = Time.DeltaTime;
+        var commandBuffer = _barrier.CreateCommandBuffer().AsParallelWriter();
 
         Entities.WithAll<BehaviourStateChasing>().ForEach((
-            Entity entity, ref Translation translation, ref Rotation rotation, ref BehaviourStateChasing behaviourStateChasing,
-            ref Turning turning, ref Speed speed, ref AttackDistance attackDistance
+            Entity entity,int nativeThreadIndex, ref Translation translation, ref Rotation rotation, in BehaviourStateChasing behaviourStateChasing,
+            in Turning turning, in Speed speed, in AttackDistance attackDistance
             ) =>
         {
-            float3 myPos = translation.Value;
-            quaternion myRot = rotation.Value;
-            float turningSpeed = turning.TurningSpeed;
-
-            if (EntityManager.HasComponent(behaviourStateChasing.ChaseTarget, typeof(Translation)))
+            if (!HasComponent<LocalToWorld>(behaviourStateChasing.Target))
             {
-                float3 turgetPoint = World.DefaultGameObjectInjectionWorld.EntityManager.GetComponentData<Translation>(behaviourStateChasing.ChaseTarget).Value;
-
+                commandBuffer.RemoveComponent<BehaviourStateChasing>(nativeThreadIndex,entity);
+                commandBuffer.AddComponent<BehaviourStatePatrolling>(nativeThreadIndex,entity);
+            }
+            else
+            {
+                // checks for attack
+                var myPos = translation.Value;
+                var targetTransform = GetComponent<LocalToWorld>(behaviourStateChasing.Target);
+                var targetPos = targetTransform.Position;
+                var myAttackDistance = attackDistance.Value;
+                var turningSpeed = turning.TurningSpeed;
+                var myRot = rotation.Value;
+                
                 // rotation
-                rotation.Value = SharedMethods.RotateTowardsTarget(myPos, myRot, turgetPoint, turningSpeed, Time.DeltaTime);
+                rotation.Value = SharedMethods.RotateTowardsTarget(myPos, myRot, targetPos, turningSpeed, deltaTime);
 
                 // movement
                 translation.Value += speed.PatrollSpeed * deltaTime * math.forward(rotation.Value);
 
                 // checks for attack
-                float3 targetPos = World.DefaultGameObjectInjectionWorld.EntityManager.GetComponentData<Translation>(behaviourStateChasing.ChaseTarget).Value;
-                float myAttackDistance = attackDistance.Value;
-
                 if (SharedMethods.CanAttackTarget(myPos, targetPos, myAttackDistance))
                 {
-                    EntityManager.RemoveComponent(entity, typeof(BehaviourStateChasing));
-                    EntityManager.AddComponentData(entity, new BehaviourStateAttacking { AttackTarget = behaviourStateChasing.ChaseTarget });
+                    commandBuffer.RemoveComponent<BehaviourStateChasing>(nativeThreadIndex,entity);
+                    commandBuffer.AddComponent(nativeThreadIndex,entity, new BehaviourStateAttacking { Target = behaviourStateChasing.Target });
                 }
             }
-            else
-            {
-                EntityManager.RemoveComponent(entity, typeof(BehaviourStateChasing));
-                EntityManager.AddComponent(entity, typeof(BehaviourStatePatrolling));
-            }
-        });
+        }).ScheduleParallel();
+
+        _barrier.AddJobHandleForProducer(Dependency);
     }
 }

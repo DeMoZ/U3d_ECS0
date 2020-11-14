@@ -3,17 +3,17 @@ using Unity.Jobs;
 
 public class LifeTimerSystem : SystemBase
 {
-    EntityCommandBufferSystem m_Barrier;
+    EntityCommandBufferSystem m_barrier;
 
     protected override void OnCreate()
     {
-        m_Barrier = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
+        m_barrier = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
     }
 
     // OnUpdate runs on the main thread.
     protected override void OnUpdate()
     {
-        var commandBuffer = m_Barrier.CreateCommandBuffer().AsParallelWriter();
+        var commandBuffer = m_barrier.CreateCommandBuffer().AsParallelWriter();
         var deltaTime = Time.DeltaTime;
 
         Entities.ForEach((Entity entity, int nativeThreadIndex, ref LifeTimer lifetimer) =>
@@ -26,6 +26,6 @@ public class LifeTimerSystem : SystemBase
             }
         }).ScheduleParallel();
 
-        m_Barrier.AddJobHandleForProducer(Dependency);
+        m_barrier.AddJobHandleForProducer(Dependency);
     }
 }

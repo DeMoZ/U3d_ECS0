@@ -2,20 +2,15 @@ using Unity.Mathematics;
 
 public static class SharedMethods
 {
-    public static float MakeRandom(float2 patrolingTimeRange, string str = "", bool log = false)
+
+    public static float MakeRandom(float2 range)
     {
-        return MakeRandom(patrolingTimeRange.x, patrolingTimeRange.y, str);
+        return UnityEngine.Random.Range(range.x, range.y);
     }
 
-    public static float MakeRandom(float x, float y, string str = "", bool log = false)
+    public static float MakeRandom(float x, float y)
     {
-        if (log)
-        {
-            float rnd = UnityEngine.Random.Range(x, y);
-            return rnd;
-        }
-        else
-            return UnityEngine.Random.Range(x, y);
+        return UnityEngine.Random.Range(x, y);
     }
 
     public static quaternion RandomRotation()
@@ -32,7 +27,7 @@ public static class SharedMethods
                           UnityEngine.Random.Range(-10, 10));
     }
 
-    public static Random _Random = new Random();
+    public static Random _Random = new Random(1);
 
     public static float3 RandomPointOnCircle(float3 center, float radius)
     {
@@ -45,8 +40,8 @@ public static class SharedMethods
 
     public static float3 RandomPointInCircleRadius(float radius)
     {
-        float angle = _Random.NextFloat() * math.PI * 2;
-        float distance = math.sqrt(_Random.NextFloat()) * radius;
+        float angle = MakeRandom(0, 360);// _Random.NextFloat() * math.PI * 2;
+        float distance = MakeRandom(0, 1) * radius;// math.sqrt(_Random.NextFloat()) * radius;
         float x = distance * math.cos(angle);
         float z = distance * math.sin(angle);
         return new float3(x, 0, z);
@@ -68,5 +63,14 @@ public static class SharedMethods
             return true;
 
         return false;
+    }
+
+    public static float3 GetRandomPatrollingPoint(float3 myPos, float radius)
+    {
+        float3 newPoint = float3.zero;
+        newPoint = myPos;
+        newPoint += RandomPointInCircleRadius(radius);
+
+        return newPoint;
     }
 }
