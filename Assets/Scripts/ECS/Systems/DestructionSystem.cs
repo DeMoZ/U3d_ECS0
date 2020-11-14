@@ -1,30 +1,50 @@
-﻿using Unity.Entities;
+﻿using Unity.Collections;
+using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 
-public class DestructionSystem : ComponentSystem
+public class DestructionSystem : SystemBase
 {
-    private EntityManager entityManager;
+    private EndSimulationEntityCommandBufferSystem _buffer;
+    private EntityQuery _group;
 
     protected override void OnStartRunning()
     {
-        entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
+        _buffer = World.GetExistingSystem<EndSimulationEntityCommandBufferSystem>();
+        _group = GetEntityQuery(ComponentType.ReadOnly<Translation>(), ComponentType.ReadOnly<Destructable>());
     }
 
     protected override void OnUpdate()
     {
-        Entities.WithAll<Destructor>().ForEach((Entity vilian, ref Translation vilianTrans, ref Destructor destructor) =>
-        {
-            float3 vilianPos = vilianTrans.Value;
+        var commandBuffer = _buffer.CreateCommandBuffer();
 
-            Entities.WithAll<Destructable>().ForEach((Entity victim, ref Translation victimTrans, ref Destructable destructable) =>
+        var chunks = _group.CreateArchetypeChunkArray(Allocator.TempJob);
+        var destructableType = GetComponentTypeHandle<Destructable>();
+        var translationType = GetComponentTypeHandle<Translation>();
+        var entitiesType = GetEntityTypeHandle();
+
+        Entities.WithAll<Destructor>().ForEach((Entity vilian, in Translation vilianTrans, in Destructor destructor) =>
+        {
+            var vilianPos = vilianTrans.Value;
+
+            for (int c = 0; c < chunks.Length; c++)
             {
-                if (math.distance(vilianPos, victimTrans.Value) < 1)
+                var chunk = chunks[c];
+                var destructableTypeArray = chunk.GetNativeArray(destructableType);
+                var translationTypeArray = chunk.GetNativeArray(translationType);
+                var entitiesTypeArray = chunk.GetNativeArray(entitiesType);
+
+                for (int i = 0; i < chunk.Count; i++)
                 {
-                    entityManager.DestroyEntity(vilian);
-                    entityManager.DestroyEntity(victim);
+                    if (math.distance(vilianPos, translationTypeArray[i].Value) < 1)
+                    {
+                        commandBuffer.DestroyEntity(vilian);
+                        commandBuffer.DestroyEntity(entitiesTypeArray[i]);
+                    }
                 }
-            });
-        });
+            }
+        }).Run();
+
+        chunks.Dispose();
     }
 }
