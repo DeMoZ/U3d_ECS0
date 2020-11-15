@@ -14,16 +14,6 @@ public class MoveForwardSystem : SystemBase
          ) =>
      {
          trans.Value += moveForward.speed * deltaTime * math.forward(rot.Value);
-     }).Run();
-
-        //// Behaviour states movement
-        //Entities.WithAny<BehaviourStatePatrolling, BehaviourStateChasing>().ForEach((
-        //     ref Translation trans,
-        //     in Rotation rot,
-        //     in MoveForward moveForward
-        //     ) =>
-        // {
-        //     trans.Value += moveForward.speed * deltaTime * math.forward(rot.Value);
-        // }).Run();
+     }).ScheduleParallel();
     }
 }
