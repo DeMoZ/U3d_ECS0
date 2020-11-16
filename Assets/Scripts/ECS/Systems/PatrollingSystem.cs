@@ -18,7 +18,7 @@ public class PatrollingSystem : SystemBase
     {
         barrier = World.GetExistingSystem<EndSimulationEntityCommandBufferSystem>();
 
-        m_Group = GetEntityQuery(typeof(TeamTag), typeof(Translation));//ComponentType.ReadOnly<TeamTag>(), ComponentType.ReadOnly<Translation>());
+        m_Group = GetEntityQuery(ComponentType.ReadOnly<TeamTag>(), ComponentType.ReadOnly<Translation>());
     }
 
     protected override void OnUpdate()
