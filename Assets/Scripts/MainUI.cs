@@ -6,22 +6,16 @@ using UnityEngine.UI;
 
 public class MainUI : MonoBehaviour
 {
-    [SerializeField] Text _totalEnemy;
     [SerializeField] Text _addBtn;
+    [SerializeField] Text _totalBots;
+    [SerializeField] Text _totalBullets;
+    [SerializeField] Text _totalEntities;
 
     public static MainUI instance;
-
-    private int _totalValue = 0;
 
     private void Awake()
     {
         instance = this;
-    }
-
-    public void SetTotalEnemyValue(int value)
-    {
-        _totalValue = value;
-        _totalEnemy.text = value.ToString();
     }
 
     internal void SetAddAmoutn(int manualSpawnAmount)
@@ -29,8 +23,18 @@ public class MainUI : MonoBehaviour
         _addBtn.text = string.Concat("Add ", manualSpawnAmount);
     }
 
-    internal void DecreaseEnemyValue(int amount)
+    public void SetValues(int bots, int bullets, int entities)
     {
-        _totalEnemy.text = (_totalValue - 1).ToString();
+        SetTotalEnemyValue(bots);
+        _totalBullets.text = bullets.ToString();
+        _totalEntities.text = entities.ToString();
+    }
+    public void SetTotalEnemyValue(int value)
+    {
+        _totalBots.text = value.ToString();
+    }
+    public void DebugLogFOrTest()
+    {
+        Debug.Log("LogWorks");
     }
 }
