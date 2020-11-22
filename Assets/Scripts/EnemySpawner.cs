@@ -16,12 +16,12 @@ public class EnemySpawner : MonoBehaviour
 
     [Header("Autospawn")]
     [Tooltip("Amount of creature for autospawning")]
+    [SerializeField] bool _autospawn = true;
     [SerializeField] private int _autoSpawnAmount = 5;
     [SerializeField] private float _spawnTime = 0.1f;
     private float _spawnTimer;
 
     [Header("Somehing")]
-    [SerializeField] bool _autospawn = true;
     [SerializeField] private float _spawnRadius = 10f;
     [SerializeField] private MainUI _mainUI;
 
@@ -32,11 +32,18 @@ public class EnemySpawner : MonoBehaviour
         _spawnTimer = _spawnTime;
 
         _entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
-
-        var settings = GameObjectConversionSettings.FromWorld(World.DefaultGameObjectInjectionWorld, null);
+        
         _mainUI.SetAddAmoutn(_manualSpawnAmount);
 
-        foreach (GameObject prefab in _enemiesPrefabs)
+        var settings = GameObjectConversionSettings.FromWorld(World.DefaultGameObjectInjectionWorld, null);
+        ConvertPrefabsToEntities(settings);
+
+        var testGo = Instantiate(_enemiesPrefabs[0]);
+    }
+
+    private void ConvertPrefabsToEntities(GameObjectConversionSettings settings)
+    {
+        foreach (var prefab in _enemiesPrefabs)
         {
             Entity newEntity = GameObjectConversionUtility.ConvertGameObjectHierarchy(prefab, settings);
             _enemyEntitiesPrefabs.Add(newEntity);
