@@ -23,7 +23,7 @@ public static class SharedMethods
     public static float3 RandomPointOnCircle(object spawnRadius)
     {
         return new float3(UnityEngine.Random.Range(-10, 10),
-                          1f,
+                          -1f,
                           UnityEngine.Random.Range(-10, 10));
     }
 
