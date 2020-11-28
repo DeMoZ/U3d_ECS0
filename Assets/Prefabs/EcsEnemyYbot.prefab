@@ -72,7 +72,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 588116310236817409}
-  - component: {fileID: 6830065624471483003}
   - component: {fileID: 377579127785156499}
   - component: {fileID: 2290228064121263323}
   - component: {fileID: 2753536828585747594}
@@ -82,7 +81,7 @@ GameObject:
   - component: {fileID: 1165186734740468763}
   - component: {fileID: 790483487796830961}
   m_Layer: 0
-  m_Name: ybot
+  m_Name: EcsEnemyYbot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -105,25 +104,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!95 &6830065624471483003
-Animator:
-  serializedVersion: 3
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 243959672534938299}
-  m_Enabled: 1
-  m_Avatar: {fileID: 9000000, guid: 9b50d1244832d9847805245bb35f0e92, type: 3}
-  m_Controller: {fileID: 0}
-  m_CullingMode: 1
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 1
-  m_LinearVelocityBlending: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!114 &377579127785156499
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1842,7 +1822,7 @@ SkinnedMeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: -4565884009001823619, guid: 9b50d1244832d9847805245bb35f0e92, type: 3}
+  - {fileID: 2100000, guid: cb969ae4debf81547abee804648ea792, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
