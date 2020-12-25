@@ -1,11 +1,10 @@
-﻿using System.ComponentModel;
-using Unity.Collections;
+﻿using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
 using UnityEngine.Jobs;
 using Random = UnityEngine.Random;
 
-namespace JobsScripts
+namespace JobsBoidsLike
 {
     public class BoidsBehaviour : MonoBehaviour
     {
