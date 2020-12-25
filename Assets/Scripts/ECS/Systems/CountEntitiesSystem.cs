@@ -36,7 +36,7 @@ public class CountEntitiesSystem : ComponentSystem
                 countEntities++;
             });
 
-            _mainIU.SetValues(countBots, countBullets, countEntities);
+            _mainIU?.SetValues(countBots, countBullets, countEntities);
         }
         else
         {

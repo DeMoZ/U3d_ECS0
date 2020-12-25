@@ -327,8 +327,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5d90282e98c6594f879228c89b6783e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _numberOfEntities: 1000
-  _entityPrefab: {fileID: 7672553662030407653, guid: 3c91f7fac14908b43b2c9256faa54686, type: 3}
+  _numberOfEntities: 150
+  _entityPrefab: {fileID: 243959672534938299, guid: 2d3bbe3fac47b944087633029f1532fc, type: 3}
   _destinationThreshold: 4
   _velocityLimit: 4
 --- !u!4 &1632166235
