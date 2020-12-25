@@ -1,9 +1,11 @@
-﻿using Unity.Collections;
+﻿using Unity.Burst;
+using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Jobs;
 
-namespace JobsScripts
+namespace JobsBoidsLike
 {
+    [BurstCompile]
     public struct MoveJob : IJobParallelForTransform
     {
         public NativeArray<Vector3> Positions; // позиции всех трансформов
