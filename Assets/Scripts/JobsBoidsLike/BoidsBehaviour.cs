@@ -32,7 +32,7 @@ namespace JobsBoidsLike
             {
                 transforms[i] = Instantiate(_entityPrefab).transform;
                 var random = Random.insideUnitCircle;
-                _velocities[i] = new Vector3(random.x, _groundHeight, random.y);
+                _velocities[i] = new Vector3(random.x, 0, random.y);
             }
 
             _transformAccessArray = new TransformAccessArray(transforms); // потокобезопасная обертка
