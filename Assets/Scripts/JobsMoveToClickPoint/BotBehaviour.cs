@@ -2,6 +2,7 @@ using System;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.Jobs;
 
 namespace JobsMoveToClickPoint
@@ -15,7 +16,8 @@ namespace JobsMoveToClickPoint
         private NativeArray<Vector3> _positions;
         private NativeArray<Quaternion> _rotations;
         private NativeArray<Vector3> _velocities;
-
+        private Array<NavMeshAgent> _navMeshAgents;
+        
         /// <summary>
         /// thread safe wrap
         /// </summary>
@@ -46,8 +48,16 @@ namespace JobsMoveToClickPoint
                 DeltaTime = deltaTime,
                 TargetPosition = TargetPosition
             };
-
+            /*
             var velocityJob = new VelocityJob()
+            {
+                Velocities = _velocities,
+                Positions = _positions,
+                DeltaTime = deltaTime,
+                TargetPosition = TargetPosition
+            };
+            */
+            var velocityJob = new VelocityJobNavMesh()
             {
                 Velocities = _velocities,
                 Positions = _positions,
