@@ -16,7 +16,7 @@ namespace JobsMoveToClickPoint
             _botPrefab = Resources.Load(BotPath) as GameObject;
 
         public Transform[] GenerateBots(int amount, ref NativeArray<Quaternion> rotations,
-            ref NativeArray<Vector3> velocities, ref NativeArray<Vector3> positions)
+            ref NativeArray<Vector3> positions)
         {
             var transforms = new Transform[amount];
 
@@ -24,7 +24,6 @@ namespace JobsMoveToClickPoint
             {
                 transforms[i] = GameObject.Instantiate(_botPrefab).transform;
                 rotations[i] = RandomRotation();
-                velocities[i] = RandomVelocity();
                 positions[i] = RandomPosition();
 
                 transforms[i].position = positions[i];
@@ -43,12 +42,6 @@ namespace JobsMoveToClickPoint
         {
             var random = Random.Range(0f, 360f);
             return Quaternion.Euler(new Vector3(0, random, 0));
-        }
-
-        private Vector3 RandomVelocity()
-        {
-            var random = Random.insideUnitCircle;
-            return new Vector3(random.x, 0, random.y);
         }
     }
 }

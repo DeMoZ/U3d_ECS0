@@ -9,7 +9,7 @@ namespace JobsMoveToClickPoint
     [BurstCompile]
     public struct RotationJob : IJobParallelFor
     {
-        private const float RotationSpeed = 2f;
+        private const float RotationSpeed = 1f;
 
         public NativeArray<Quaternion> Rotations;
         public NativeArray<Vector3> Positions;
