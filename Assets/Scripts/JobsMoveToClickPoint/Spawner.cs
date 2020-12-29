@@ -21,12 +21,7 @@ namespace JobsMoveToClickPoint
         {
             _botBehaviour.Update();
         }
-
-        private void OnDestroy()
-        {
-            _botBehaviour.OnDestroy();
-        }
-
+       
         private void SetTargetPosition(Vector3 point) =>
             _botBehaviour.TargetPosition = point;
     }

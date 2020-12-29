@@ -6,6 +6,7 @@ namespace JobsMoveToClickPoint
     public class BotFactory : IBotFactory
     {
         private const string BotPath = "BotPrefabs/EcsEnemyYbotForJobs";
+        private const string BulletPath = "BotPrefabs/ECSBulletForJobs";
 
         private const float GroundHeight = 1f;
         private const float SpawnAreaRadius = 5f;
@@ -14,19 +15,17 @@ namespace JobsMoveToClickPoint
 
         public BotFactory() =>
             _botPrefab = Resources.Load(BotPath) as GameObject;
+            //_botPrefab = Resources.Load(BulletPath) as GameObject;
 
-        public Transform[] GenerateBots(int amount, ref NativeArray<Quaternion> rotations,
-            ref NativeArray<Vector3> positions)
+        public Transform[] GenerateBots(int amount)
         {
             var transforms = new Transform[amount];
 
             for (var i = 0; i < amount; i++)
             {
                 transforms[i] = GameObject.Instantiate(_botPrefab).transform;
-                rotations[i] = RandomRotation();
-                positions[i] = RandomPosition();
-
-                transforms[i].position = positions[i];
+                transforms[i].rotation = RandomRotation();
+                transforms[i].position = RandomPosition();
             }
 
             return transforms;

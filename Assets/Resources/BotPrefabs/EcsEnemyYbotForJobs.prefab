@@ -82,7 +82,7 @@ GameObject:
   - component: {fileID: 1165186734740468763}
   - component: {fileID: 790483487796830961}
   m_Layer: 0
-  m_Name: ybot
+  m_Name: EcsEnemyYbotForJobs
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -996,7 +996,7 @@ SkinnedMeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: -840037777384891287, guid: 9b50d1244832d9847805245bb35f0e92, type: 3}
+  - {fileID: 2100000, guid: c7980d95711a8b24388e45faf8a82003, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1842,7 +1842,7 @@ SkinnedMeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: -4565884009001823619, guid: 9b50d1244832d9847805245bb35f0e92, type: 3}
+  - {fileID: 2100000, guid: 1cfd95c694dba6e42a684c1e0c6b78a9, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
