@@ -8,14 +8,18 @@ namespace JobsMoveToClickPoint
     [BurstCompile]
     public struct MoveJob : IJobParallelForTransform
     {
-        public NativeArray<Quaternion> Rotations;
-        public NativeArray<Vector3> Positions;
-        public NativeArray<Vector3> Velocities;
+        [WriteOnly] public NativeArray<Vector3> Positions;
+        
+        [ReadOnly] public NativeArray<Quaternion> Rotations;
+        [ReadOnly] public NativeArray<Vector3> Velocities;
+        [ReadOnly] public NativeArray<int> Exists;
 
         public float DeltaTime;
 
         public void Execute(int index, TransformAccess transform)
         {
+            if (Exists[index] == 0) return;
+
             transform.position += Velocities[index] * DeltaTime;
             transform.rotation = Rotations[index];
             Positions[index] = transform.position;

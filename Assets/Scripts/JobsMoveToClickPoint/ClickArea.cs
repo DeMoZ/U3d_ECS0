@@ -6,7 +6,7 @@ namespace JobsMoveToClickPoint
 {
     public class ClickArea : MonoBehaviour, IPointerClickHandler
     {
-        private Action<Vector3> _onClickHandler;
+        private event Action<Vector3> _onClickHandler;
 
         public void OnPointerClick(PointerEventData eventData)
         {

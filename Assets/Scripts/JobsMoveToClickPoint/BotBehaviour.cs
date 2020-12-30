@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
@@ -15,38 +16,46 @@ namespace JobsMoveToClickPoint
         private NativeArray<Vector3> _positions;
         private NativeArray<Quaternion> _rotations;
         private NativeArray<Vector3> _velocities;
+        private NativeArray<int> _exists;
 
         private Transform[] _transforms;
+
 
         /// <summary>
         /// thread safe wrap
         /// </summary>
         private TransformAccessArray _transformAccessArray;
 
-        private List<MovingObject> _movingObjects = new List<MovingObject>();
         private float _secondsCount;
+
+        private bool _reinitialize;
+
+        private int _countedBotsAmount;
 
         public BotBehaviour(int numberOfBots, IBotFactory botFactory)
         {
             _numberOfBots = numberOfBots;
 
             botFactory = new BotFactory();
-            _transforms = botFactory.GenerateBots(_numberOfBots);
 
-            InstantiateMovingObjects();
+            _transforms = botFactory.GenerateBots(_numberOfBots);
+            _positions = new NativeArray<Vector3>(_numberOfBots, Allocator.Persistent);
+            _rotations = new NativeArray<Quaternion>(_numberOfBots, Allocator.Persistent);
+            _velocities = new NativeArray<Vector3>(_numberOfBots, Allocator.Persistent);
+            _exists = new NativeArray<int>(_numberOfBots, Allocator.Persistent);
+            InitializeExists();
+
+            _transformAccessArray = new TransformAccessArray(_transforms); // потокобезопасная обертка
         }
 
         public void Update()
         {
-            MovingObjectsToNative();
-
             var deltaTime = Time.deltaTime;
 
             var rotationJob = CreateRotationJob(deltaTime);
             var velocityJob = CreateVelocityJob(deltaTime);
             var moveJob = CreateMoveJob(deltaTime);
 
-            _transformAccessArray = new TransformAccessArray(_transforms); // потокобезопасная обертка
             JobHandle rotationHandle = rotationJob.Schedule(_numberOfBots, 0);
             JobHandle velocityHandle = velocityJob.Schedule(_numberOfBots, 0, rotationHandle);
             JobHandle moveHandle = moveJob.Schedule(_transformAccessArray, velocityHandle);
@@ -54,7 +63,46 @@ namespace JobsMoveToClickPoint
 
             DestroyObject(deltaTime);
 
-            NativeToMovingObjects();
+            ReduceNativeArrays();
+        }
+
+        private void ReduceNativeArrays()
+        {
+            if (_reinitialize)
+            {
+                var countedNumberOfBots = new NativeArray<int>(1, Allocator.TempJob);
+
+                CountNewArrayDimension(countedNumberOfBots);
+                // после посчета, надо переинициализировать
+
+                Reinitialize();
+            }
+        }
+
+        private void Reinitialize()
+        {
+// знаю количество старых и количество новых массивов
+            // var transforms = new Transform[_countedBotsAmount];
+            // var positions = new NativeArray<Vector3>(_numberOfBots, Allocator.TempJob);
+            // var rotations = new NativeArray<Quaternion>(_numberOfBots, Allocator.TempJob);
+            // var velocities = new NativeArray<Vector3>(_numberOfBots, Allocator.TempJob);
+            // var exists = new NativeArray<int>(_numberOfBots, Allocator.TempJob);
+
+            SwapArrays swapArraysJob = new SwapArrays()
+            {
+                Positions = _positions,
+                Rotations = _rotations,
+                Velocities = _velocities,
+                Exists = _exists,
+                CountedBotsAmount = _countedBotsAmount
+            };
+
+            var swapArraysHandle = swapArraysJob.Schedule(_transformAccessArray);
+            swapArraysHandle.Complete();
+        }
+
+        public void OnDestroy()
+        {
             DisposeNatives();
         }
 
@@ -66,15 +114,19 @@ namespace JobsMoveToClickPoint
             _transformAccessArray.Dispose();
         }
 
-        private MoveJob CreateMoveJob(float deltaTime)
+        private void CountNewArrayDimension(NativeArray<int> countedNumberOfBots)
         {
-            return new MoveJob()
+            var сountExistsJob = new CountExistsJob()
             {
-                Rotations = _rotations,
-                Positions = _positions,
-                Velocities = _velocities,
-                DeltaTime = deltaTime
+                NumberOfBots = countedNumberOfBots,
+                Exists = _exists
             };
+
+            JobHandle reinitializeHandle = сountExistsJob.Schedule();
+            reinitializeHandle.Complete();
+
+            _countedBotsAmount = countedNumberOfBots[0];
+            countedNumberOfBots.Dispose();
         }
 
         private VelocityJob CreateVelocityJob(float deltaTime)
@@ -84,7 +136,8 @@ namespace JobsMoveToClickPoint
                 Velocities = _velocities,
                 Positions = _positions,
                 DeltaTime = deltaTime,
-                TargetPosition = TargetPosition
+                TargetPosition = TargetPosition,
+                Exists = _exists
             };
         }
 
@@ -95,43 +148,21 @@ namespace JobsMoveToClickPoint
                 Positions = _positions,
                 Rotations = _rotations,
                 DeltaTime = deltaTime,
-                TargetPosition = TargetPosition
+                TargetPosition = TargetPosition,
+                Exists = _exists
             };
         }
 
-        private void MovingObjectsToNative()
+        private MoveJob CreateMoveJob(float deltaTime)
         {
-            _numberOfBots = _movingObjects.Count;
-
-            _transforms = new Transform[_numberOfBots];
-            _rotations = new NativeArray<Quaternion>(_numberOfBots, Allocator.TempJob);
-            _positions = new NativeArray<Vector3>(_numberOfBots, Allocator.TempJob);
-            _velocities = new NativeArray<Vector3>(_numberOfBots, Allocator.TempJob);
-
-            for (int i = 0; i < _numberOfBots; i++)
+            return new MoveJob()
             {
-                _transforms[i] = _movingObjects[i].Transform;
-                _rotations[i] = _movingObjects[i].Transform.rotation;
-                _positions[i] = _movingObjects[i].Transform.position;
-                _velocities[i] = _movingObjects[i].Velocity;
-            }
-        }
-
-        private void NativeToMovingObjects()
-        {
-            _movingObjects = new List<MovingObject>();
-
-            for (int i = 0; i < _transforms.Length; i++)
-                if ((object) _transforms[i] != null)
-                    _movingObjects.Add(new MovingObject(_transforms[i], _velocities[i]));
-        }
-
-        private void InstantiateMovingObjects()
-        {
-            _movingObjects = new List<MovingObject>();
-
-            for (int i = 0; i < _transforms.Length; i++)
-                _movingObjects.Add(new MovingObject(_transforms[i], Vector3.zero));
+                Rotations = _rotations,
+                Positions = _positions,
+                Velocities = _velocities,
+                DeltaTime = deltaTime,
+                Exists = _exists
+            };
         }
 
         private void DestroyObject(float deltaTime)
@@ -140,10 +171,39 @@ namespace JobsMoveToClickPoint
             if (_secondsCount > 1f)
             {
                 _secondsCount = 0;
+
+                _reinitialize = true;
+
                 var random = Random.Range(0, _transforms.Length);
+
+                if (!_transforms[random]) return;
+
                 GameObject.Destroy(_transforms[random].gameObject);
                 _transforms[random] = null;
+                _exists[random] = 0;
             }
+        }
+
+        private void InitializeExists()
+        {
+            var initializeExistsJob = new InitializeExistsJob {Exists = _exists};
+
+            var initializeExistsHandle = initializeExistsJob.Schedule(_numberOfBots, 0);
+            initializeExistsHandle.Complete();
+        }
+    }
+
+    [BurstCompile]
+    public struct SwapArrays : IJobParallelForTransform
+    {
+        public NativeArray<Quaternion> Rotations;
+        public NativeArray<Vector3> Velocities;
+        public NativeArray<int> Exists;
+        public int CountedBotsAmount;
+        public NativeArray<Vector3> Positions;
+
+        public void Execute(int index, TransformAccess transform)
+        {
         }
     }
 }

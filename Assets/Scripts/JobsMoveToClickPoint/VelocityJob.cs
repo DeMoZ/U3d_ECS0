@@ -9,19 +9,19 @@ namespace JobsMoveToClickPoint
     public struct VelocityJob : IJobParallelFor
     {
         public NativeArray<Vector3> Velocities;
-        public NativeArray<Vector3> Positions;
-        
+        [ReadOnly] public NativeArray<Vector3> Positions;
+        [ReadOnly] public NativeArray<int> Exists;
+
         public float DeltaTime;
 
         public Vector3 TargetPosition;
-        
+
         public void Execute(int index)
         {
-            // найти вектор на TargetPosition
-            // изменить велосити на вектор до TargetPosition
+            if (Exists[index] == 0) return;
 
             var desiredVelocity = TargetPosition - Positions[index];
-            
+
             Velocities[index] = Vector3.Lerp(Velocities[index], desiredVelocity, DeltaTime);
         }
     }
