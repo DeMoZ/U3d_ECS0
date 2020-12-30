@@ -12,7 +12,7 @@ namespace JobsMoveToClickPoint
         private const float RotationSpeed = 1f;
 
         public NativeArray<Quaternion> Rotations;
-        public NativeArray<Vector3> Positions;
+        [ReadOnly] public NativeArray<Vector3> Positions;
 
         public float DeltaTime;
         public Vector3 TargetPosition;

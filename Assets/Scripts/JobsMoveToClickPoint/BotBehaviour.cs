@@ -41,21 +41,27 @@ namespace JobsMoveToClickPoint
             MovingObjectsToNative();
 
             var deltaTime = Time.deltaTime;
+            
+            MoveToPointJobs(deltaTime);
 
+            DestroyObject(deltaTime);
+
+            NativeToMovingObjects();
+            
+            DisposeNatives();
+        }
+
+        private void MoveToPointJobs(float deltaTime)
+        {
             var rotationJob = CreateRotationJob(deltaTime);
             var velocityJob = CreateVelocityJob(deltaTime);
             var moveJob = CreateMoveJob(deltaTime);
-
+            
             _transformAccessArray = new TransformAccessArray(_transforms); // потокобезопасная обертка
             JobHandle rotationHandle = rotationJob.Schedule(_numberOfBots, 0);
             JobHandle velocityHandle = velocityJob.Schedule(_numberOfBots, 0, rotationHandle);
             JobHandle moveHandle = moveJob.Schedule(_transformAccessArray, velocityHandle);
             moveHandle.Complete();
-
-            DestroyObject(deltaTime);
-
-            NativeToMovingObjects();
-            DisposeNatives();
         }
 
         private void DisposeNatives()

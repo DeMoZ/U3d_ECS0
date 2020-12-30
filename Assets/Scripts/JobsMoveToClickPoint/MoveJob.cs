@@ -8,9 +8,9 @@ namespace JobsMoveToClickPoint
     [BurstCompile]
     public struct MoveJob : IJobParallelForTransform
     {
-        public NativeArray<Quaternion> Rotations;
-        public NativeArray<Vector3> Positions;
-        public NativeArray<Vector3> Velocities;
+        [WriteOnly] public NativeArray<Vector3> Positions;
+        [ReadOnly] public NativeArray<Quaternion> Rotations;
+        [ReadOnly] public NativeArray<Vector3> Velocities;
 
         public float DeltaTime;
 
