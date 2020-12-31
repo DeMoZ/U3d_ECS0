@@ -26,14 +26,17 @@ namespace JobsMoveToClickPoint
         private List<MovingObject> _movingObjects = new List<MovingObject>();
         private float _secondsCount;
 
+        private List<BotAnimator> _botAnimators=new List<BotAnimator>();
         public BotBehaviour(int numberOfBots, IBotFactory botFactory)
         {
             _numberOfBots = numberOfBots;
 
             botFactory = new BotFactory();
             _transforms = botFactory.GenerateBots(_numberOfBots);
-
+            
             InstantiateMovingObjects();
+            
+            PopulateAnimationsArray();
         }
 
         public void Update()
@@ -44,11 +47,25 @@ namespace JobsMoveToClickPoint
             
             MoveToPointJobs(deltaTime);
 
-            DestroyObject(deltaTime);
+            //DestroyObject(deltaTime);
 
             NativeToMovingObjects();
             
+           // ApplyMovementAnimation();
+            
             DisposeNatives();
+        }
+
+        private void ApplyMovementAnimation()
+        {
+            for (int i = 0; i < _transforms.Length; i++)
+            {
+                if (_transforms[i])
+                {
+                    var moveVector = _transforms[i].TransformDirection(_velocities[i]);
+                    _botAnimators[i].ApplyMovement(moveVector);
+                }
+            }
         }
 
         private void MoveToPointJobs(float deltaTime)
@@ -140,6 +157,15 @@ namespace JobsMoveToClickPoint
                 _movingObjects.Add(new MovingObject(_transforms[i], Vector3.zero));
         }
 
+        private void PopulateAnimationsArray()
+        {
+            for (int i = 0; i < _transforms.Length; i++)
+            {
+                var animation = _transforms[i].GetComponent<BotAnimator>();
+                _botAnimators.Add(animation);
+            }
+        }
+
         private void DestroyObject(float deltaTime)
         {
             _secondsCount += deltaTime;
@@ -149,6 +175,8 @@ namespace JobsMoveToClickPoint
                 var random = Random.Range(0, _transforms.Length);
                 GameObject.Destroy(_transforms[random].gameObject);
                 _transforms[random] = null;
+                
+                _botAnimators.RemoveAt(random);
             }
         }
     }
