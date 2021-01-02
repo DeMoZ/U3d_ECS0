@@ -1,29 +1,35 @@
 using Unity.Burst;
 using Unity.Collections;
-using Unity.Jobs;
-using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Jobs;
 
 namespace JobsMoveToClickPoint
 {
     [BurstCompile]
-    public struct RotationJob : IJobParallelFor
+    public struct RotationJob : IJobParallelForTransform
     {
-        private const float RotationSpeed = 1f;
+        private const float RotationSpeed = 0.1f;
 
         public NativeArray<Quaternion> Rotations;
-        [ReadOnly] public NativeArray<Vector3> Positions;
 
-        public float DeltaTime;
         public Vector3 TargetPosition;
+        public float DeltaTime;
 
-        public void Execute(int index)
+        public void Execute(int index, TransformAccess transform)
         {
-            Vector3 direction = TargetPosition - Positions[index];
-            direction.y = 0;
-            Quaternion rotation = Quaternion.Lerp(Rotations[index], quaternion.LookRotation(direction, Vector3.up),
-                RotationSpeed * DeltaTime);
+            Vector3 direction = LookDirection(transform);
+            
+            Quaternion rotationVector = Quaternion.LookRotation(direction);
+            Quaternion rotation = Quaternion.Lerp(Rotations[index], rotationVector, RotationSpeed * DeltaTime);
+
             Rotations[index] = rotation;
+            transform.rotation = Rotations[index];
+        }
+
+        private Vector3 LookDirection(TransformAccess transform)
+        {
+            Vector3 targetPosition = new Vector3(TargetPosition.x, transform.position.y, TargetPosition.z);
+            return targetPosition - transform.position;
         }
     }
 }

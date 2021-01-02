@@ -26,16 +26,17 @@ namespace JobsMoveToClickPoint
         private List<MovingObject> _movingObjects = new List<MovingObject>();
         private float _secondsCount;
 
-        private List<BotAnimator> _botAnimators=new List<BotAnimator>();
+        private List<BotAnimator> _botAnimators = new List<BotAnimator>();
+
         public BotBehaviour(int numberOfBots, IBotFactory botFactory)
         {
             _numberOfBots = numberOfBots;
 
             botFactory = new BotFactory();
             _transforms = botFactory.GenerateBots(_numberOfBots);
-            
+
             InstantiateMovingObjects();
-            
+
             PopulateAnimationsArray();
         }
 
@@ -44,16 +45,30 @@ namespace JobsMoveToClickPoint
             MovingObjectsToNative();
 
             var deltaTime = Time.deltaTime;
-            
+
             MoveToPointJobs(deltaTime);
 
             //DestroyObject(deltaTime);
 
             NativeToMovingObjects();
-            
-           // ApplyMovementAnimation();
-            
+
+            ApplyMovementAnimation();
+
+            DebugWithRays();
+
             DisposeNatives();
+        }
+
+        private void DebugWithRays()
+        {
+            for (int i = 0; i < _transforms.Length; i++)
+            {
+                if (_transforms[i])
+                {
+                    Debug.DrawRay(_transforms[i].position, _transforms[i].forward, Color.yellow);
+                    Debug.DrawRay(_transforms[i].position, _velocities[i], Color.green);
+                }
+            }
         }
 
         private void ApplyMovementAnimation()
@@ -62,7 +77,7 @@ namespace JobsMoveToClickPoint
             {
                 if (_transforms[i])
                 {
-                    var moveVector = _transforms[i].TransformDirection(_velocities[i]);
+                    var moveVector = _transforms[i].InverseTransformDirection(_velocities[i]);
                     _botAnimators[i].ApplyMovement(moveVector);
                 }
             }
@@ -72,13 +87,17 @@ namespace JobsMoveToClickPoint
         {
             var rotationJob = CreateRotationJob(deltaTime);
             var velocityJob = CreateVelocityJob(deltaTime);
-            var moveJob = CreateMoveJob(deltaTime);
-            
+            //  var moveJob = CreateMoveJob(deltaTime);
+
             _transformAccessArray = new TransformAccessArray(_transforms); // потокобезопасная обертка
-            JobHandle rotationHandle = rotationJob.Schedule(_numberOfBots, 0);
-            JobHandle velocityHandle = velocityJob.Schedule(_numberOfBots, 0, rotationHandle);
-            JobHandle moveHandle = moveJob.Schedule(_transformAccessArray, velocityHandle);
-            moveHandle.Complete();
+
+            JobHandle rotationHandle = rotationJob.Schedule(_transformAccessArray);
+            rotationHandle.Complete();
+            JobHandle velocityHandle = velocityJob.Schedule(_numberOfBots, 0);
+            velocityHandle.Complete();
+            //JobHandle velocityHandle = velocityJob.Schedule(_numberOfBots, 0, rotationHandle);
+            // JobHandle moveHandle = moveJob.Schedule(_transformAccessArray, velocityHandle);
+            // moveHandle.Complete();
         }
 
         private void DisposeNatives()
@@ -115,7 +134,6 @@ namespace JobsMoveToClickPoint
         {
             return new RotationJob()
             {
-                Positions = _positions,
                 Rotations = _rotations,
                 DeltaTime = deltaTime,
                 TargetPosition = TargetPosition
@@ -175,7 +193,7 @@ namespace JobsMoveToClickPoint
                 var random = Random.Range(0, _transforms.Length);
                 GameObject.Destroy(_transforms[random].gameObject);
                 _transforms[random] = null;
-                
+
                 _botAnimators.RemoveAt(random);
             }
         }

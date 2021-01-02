@@ -21,8 +21,16 @@ namespace JobsMoveToClickPoint
         {
             _botBehaviour.Update();
         }
-       
+
         private void SetTargetPosition(Vector3 point) =>
             _botBehaviour.TargetPosition = point;
+
+        void OnDrawGizmos()
+        {
+            if (_botBehaviour == null) return;
+
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(_botBehaviour.TargetPosition, 0.5f);
+        }
     }
 }
